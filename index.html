@@ -17,11 +17,11 @@
       --radius: 22px;
       --shadow: 0 40px 120px rgba(0,0,0,.55);
 
-      /* Variables animées par JS (zoom intro) */
-      --introScale: 2.2;          /* zoom initial */
-      --introBlur: 10px;          /* flou initial */
-      --introFade: 0;             /* 0 -> 1 */
-      --introTint: 0.55;          /* voile sombre */
+      /* ✅ AU CHARGEMENT : net + visible */
+      --introScale: 1;            /* zoom initial */
+      --introBlur: 0px;           /* pas de flou */
+      --introFade: 1;             /* texte visible */
+      --introTint: 0.35;          /* voile léger */
     }
 
     *{box-sizing:border-box}
@@ -129,10 +129,9 @@
 
     /* =========================
        INTRO “ZOOM DANS LE LOGO”
-       (style Rockstar-like)
     ========================= */
     .intro{
-      height: 200vh; /* important : donne la “place” pour le zoom au scroll */
+      height: 240vh; /* ✅ plus long = zoom plus smooth */
       position:relative;
     }
 
@@ -146,7 +145,6 @@
       overflow:hidden;
     }
 
-    /* Voile sombre qui diminue en scrollant */
     .intro-sticky::before{
       content:"";
       position:absolute;
@@ -154,7 +152,6 @@
       background: rgba(0,0,0,var(--introTint));
       z-index:1;
       pointer-events:none;
-      transition: opacity .1s linear;
     }
 
     .intro-inner{
@@ -164,7 +161,6 @@
       z-index:2;
     }
 
-    /* Le “zoom” est appliqué sur ce bloc */
     .zoom-wrap{
       display:inline-block;
       transform: scale(var(--introScale));
@@ -184,7 +180,7 @@
       margin: 0 auto;
     }
 
-    /* Le texte apparaît progressivement quand on “dézoome” */
+    /* ✅ Pendant le zoom IN, on fait DISPARAÎTRE le texte */
     .brand{
       margin-top:18px;
       font-weight:950;
@@ -251,6 +247,7 @@
     }
     .btn:active{ transform: translateY(0) scale(.98) }
 
+    /* ✅ Hint visible au début, disparaît pendant le zoom */
     .scroll-hint{
       position:absolute;
       bottom: 18px;
@@ -262,7 +259,7 @@
       gap:8px;
       font-size:12px;
       color: rgba(244,247,255,.55);
-      opacity: calc(1 - var(--introFade));
+      opacity: var(--introFade);
       transition: opacity .05s linear;
       user-select:none;
       z-index:2;
@@ -669,7 +666,7 @@
       document.querySelectorAll(".reveal").forEach(el => el.classList.add("visible"));
     }
 
-    // Form: confirmation “comme un vrai” (sans backend)
+    // Form (sans backend)
     const form = document.getElementById("contactForm");
     const status = document.getElementById("status");
     form.addEventListener("submit", (e) => {
@@ -679,9 +676,11 @@
       setTimeout(() => status.classList.remove("show"), 4500);
     });
 
-    // ===== Zoom intro au scroll =====
+    // ===== Zoom IN dans le logo + Snap =====
     const intro = document.querySelector(".intro");
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+    let snapped = false;
 
     const updateIntro = () => {
       if (prefersReduced) {
@@ -693,24 +692,34 @@
       }
 
       const rect = intro.getBoundingClientRect();
-      // Progression: 0 quand on est en haut de l'intro, 1 quand on arrive en bas de l'intro (sur 100vh)
       const progress = clamp((-rect.top) / (window.innerHeight), 0, 1);
 
-      // Scale de 2.2 -> 1.0
-      const scale = 2.2 - (1.2 * progress);
-      // Blur de 10px -> 0px
-      const blur = 10 - (10 * progress);
+      // ✅ Zoom IN : 1.0 -> 2.8 (on "rentre" dans le logo)
+      const scale = 1.0 + (1.8 * progress);
 
-      // Le texte apparaît surtout sur la fin du zoom (effet plus “ciné”)
-      const fade = clamp((progress - 0.35) / 0.65, 0, 1);
+      // ✅ Blur très léger seulement pendant le zoom (sinon mets 0 partout)
+      const blur = 0 + (4 * progress);
 
-      // Voile sombre diminue
-      const tint = 0.55 - (0.25 * progress);
+      // ✅ Le texte disparaît pendant le zoom
+      const fade = 1 - clamp((progress - 0.10) / 0.55, 0, 1);
+
+      // ✅ Voile sombre augmente un peu (ciné)
+      const tint = 0.35 + (0.18 * progress);
 
       document.documentElement.style.setProperty("--introScale", scale.toFixed(3));
       document.documentElement.style.setProperty("--introBlur", blur.toFixed(2) + "px");
       document.documentElement.style.setProperty("--introFade", fade.toFixed(3));
       document.documentElement.style.setProperty("--introTint", tint.toFixed(3));
+
+      // ✅ Snap automatique vers #services quand fin du zoom
+      if (!snapped && progress > 0.985) {
+        snapped = true;
+        const target = document.querySelector("#services");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // Réactive le snap si on remonte bien au début
+      if (progress < 0.20) snapped = false;
     };
 
     let raf = null;

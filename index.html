@@ -23,9 +23,9 @@
       --globeY: 0px;
 
       /* Apparition progressive du contenu */
-      --reveal: 0;       /* texte + boutons */
-      --logoReveal: 0;   /* logo EchoDefense */
-      --logoScale: 0.96; /* micro effet */
+      --reveal: 0;
+      --logoReveal: 0;
+      --logoScale: 0.96;
     }
 
     *{box-sizing:border-box}
@@ -59,7 +59,7 @@
       mix-blend-mode: overlay;
     }
 
-    /* NAV flottante */
+    /* NAV flottante (plus premium) */
     header{
       position:fixed;
       top:14px;
@@ -67,13 +67,15 @@
       transform:translateX(-50%);
       width:min(var(--max), calc(100% - 28px));
       z-index:50;
+
       opacity:0;
       pointer-events:none;
-      transition: opacity .35s ease;
+      transition: opacity .35s ease, transform .35s ease;
     }
     header.show{
       opacity:1;
       pointer-events:auto;
+      transform: translateX(-50%) translateY(0);
     }
 
     .nav{
@@ -82,11 +84,17 @@
       justify-content:space-between;
       gap:14px;
       padding:10px 12px;
-      border:1px solid var(--border);
-      background: rgba(11,15,27,.55);
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(11,15,27,.35);
       backdrop-filter: blur(12px);
       border-radius: 999px;
-      box-shadow: 0 22px 80px rgba(0,0,0,.35);
+      box-shadow: 0 22px 80px rgba(0,0,0,.28);
+      transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    header.solid .nav{
+      background: rgba(11,15,27,.62);
+      border-color: rgba(255,255,255,.12);
+      box-shadow: 0 22px 80px rgba(0,0,0,.42);
     }
 
     .nav-left{
@@ -104,8 +112,8 @@
       border-radius:999px;
       padding:6px;
       object-fit:contain;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
     }
 
     .nav-links{
@@ -163,9 +171,25 @@
       position:absolute;
       inset:0;
       z-index:0;
-      background: radial-gradient(900px 650px at 50% 45%, rgba(0,0,0,.15), rgba(0,0,0,.75));
+
+      background: radial-gradient(900px 650px at 50% 45%, rgba(0,0,0,.10), rgba(0,0,0,.78));
       transform: scale(var(--globeScale)) translateY(var(--globeY));
       will-change: transform;
+
+      /* ✅ Halo premium subtil */
+      filter: drop-shadow(0 0 60px rgba(120,180,255,.10));
+    }
+
+    /* Halo interne un peu plus “ciné” */
+    .globe::before{
+      content:"";
+      position:absolute;
+      inset:-10%;
+      background:
+        radial-gradient(700px 520px at 50% 45%, rgba(120,180,255,.12), transparent 60%),
+        radial-gradient(800px 600px at 45% 55%, rgba(255,255,255,.06), transparent 62%);
+      opacity:.75;
+      pointer-events:none;
     }
 
     /* Calque globe vivant (rotation + respiration) */
@@ -175,7 +199,7 @@
       inset:0;
       background: url("Globe.png") center/420px no-repeat;
       transform-origin: 50% 50%;
-      will-change: transform, opacity; /* ✅ perf */
+      will-change: transform, opacity;
       animation: globeRotate 70s linear infinite, globeBreath 7.5s ease-in-out infinite;
     }
 
@@ -188,7 +212,8 @@
       50%      { opacity: 1; }
     }
     @media (prefers-reduced-motion: reduce){
-      .globe::after{ animation: none !important; } /* ✅ accessibilité */
+      .globe::after{ animation: none !important; }
+      .globe{ filter:none; }
     }
 
     .intro-inner{
@@ -245,19 +270,21 @@
       max-width: 760px;
       font-weight:850;
       font-size: clamp(15px, 2.1vw, 18px);
-      color: rgba(244,247,255,.84);
+      color: rgba(244,247,255,.86);
       opacity: var(--reveal);
       transform: translateY(calc((1 - var(--reveal)) * 14px));
       transition: opacity .05s linear, transform .05s linear;
     }
 
+    /* ✅ Typo un poil plus “brand” */
     .hero-copy{
       margin:14px auto 0;
-      max-width: 920px;
-      font-size: clamp(15px, 2vw, 17px);
+      max-width: 980px;
+      font-size: clamp(16px, 2vw, 18px);
       opacity: var(--reveal);
       transform: translateY(calc((1 - var(--reveal)) * 14px));
       transition: opacity .05s linear, transform .05s linear;
+      color: rgba(244,247,255,.74);
     }
 
     .hero-actions{
@@ -279,7 +306,7 @@
       border-radius: 999px;
       font-weight:900;
       font-size:14px;
-      border:1px solid var(--border);
+      border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.04);
       transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
       cursor:pointer;
@@ -490,7 +517,7 @@
     </div>
   </header>
 
-  <!-- INTRO -->
+  <!-- INTRO (Globe -> Zoom -> Reveal -> Snap) -->
   <section class="intro" id="home">
     <div class="intro-sticky">
       <div class="globe" aria-hidden="true"></div>
@@ -502,9 +529,12 @@
 
         <div class="brand">EchoDefense</div>
         <div class="tagline">Rendre visible pour mieux défendre.</div>
+
+        <!-- ✅ Texte intro retravaillé (plus clair + plus crédible) -->
         <p class="hero-copy">
-          Nous aidons les entreprises à rendre leur exposition numérique visible et actionnable,
-          afin de réduire la surface d’attaque et limiter les risques.
+          Nous dupliquons l’empreinte numérique de votre entreprise : au lieu d’être “visible” à une seule adresse,
+          vous apparaissez à travers de multiples points d’exposition contrôlés. Résultat : moins d’angles morts,
+          plus de détection et une surface d’attaque mieux maîtrisée.
         </p>
 
         <div class="hero-actions">
@@ -527,8 +557,11 @@
         <div>
           <span class="kicker reveal">Services</span>
           <h2 class="title reveal">Une offre lisible, orientée prévention</h2>
+
+          <!-- ✅ Lead retravaillé -->
           <p class="lead reveal">
-            EchoDefense se concentre sur la réduction de surface d’attaque : Dupliquer pour réduire les risques
+            EchoDefense réduit la surface d’attaque en rendant l’exposition visible, puis en “dupliquant” l’empreinte
+            via des points contrôlés afin de complexifier la reconnaissance et détecter plus tôt les comportements suspects.
           </p>
 
           <div class="grid">
@@ -546,7 +579,7 @@
             </div>
             <div class="card reveal">
               <h3>Déception (leurres contrôlés)</h3>
-              <p>Leurres, détection plus tôt et investigation en environnement maîtrisé.</p>
+              <p>Leurres : détection plus tôt et investigation en environnement maîtrisé.</p>
             </div>
           </div>
         </div>
@@ -570,9 +603,11 @@
         <div class="card reveal">
           <span class="kicker">Méthode</span>
           <h2 class="title">Du jumeau numérique à la réduction du risque</h2>
+
+          <!-- ✅ Lead retravaillé -->
           <p class="lead">
-            Nous modélisons l’empreinte exposée (“ce que l’on voit depuis l’extérieur”), puis nous comparons
-            à la vue attendue pour isoler les écarts et corriger.
+            Nous modélisons votre empreinte exposée (ce qu’un attaquant voit), puis nous la comparons à une vue attendue.
+            Ensuite, nous ajoutons des points d’exposition contrôlés (leurres/honeytokens) pour détourner et détecter plus tôt.
           </p>
         </div>
 
@@ -699,11 +734,15 @@
 
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // NAV apparaît après un peu de scroll
+    // NAV: apparaît + devient “solid” progressivement
     const nav = document.getElementById("topnav");
-    const navTick = () => nav.classList.toggle("show", window.scrollY > 180);
-    window.addEventListener("scroll", navTick, { passive:true });
-    navTick();
+    const setNavState = () => {
+      const y = window.scrollY || 0;
+      nav.classList.toggle("show", y > 180);
+      nav.classList.toggle("solid", y > 520);
+    };
+    window.addEventListener("scroll", setNavState, { passive:true });
+    setNavState();
 
     // Reveal sections
     if (!prefersReduced) {
@@ -725,10 +764,11 @@
       setTimeout(() => status.classList.remove("show"), 4500);
     });
 
-    // ===== Globe zoom + reveal + snap =====
+    // ===== Globe zoom + reveal + snap “naturel” =====
     const intro = document.querySelector(".intro");
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
     let snapped = false;
+    let lastY = window.scrollY || 0;
 
     const updateIntro = () => {
       if (prefersReduced) {
@@ -744,14 +784,10 @@
       const rect = intro.getBoundingClientRect();
       const progress = clamp((-rect.top) / window.innerHeight, 0, 1);
 
-      // Globe zoom IN
       const globeScale = 1 + (1.9 * progress);
       const globeY = (progress * -18).toFixed(2) + "px";
-
-      // Voile sombre diminue
       const tint = 0.65 - (0.35 * progress);
 
-      // Apparition en étapes
       const logoReveal = clamp((progress - 0.18) / 0.25, 0, 1);
       const reveal = clamp((progress - 0.35) / 0.45, 0, 1);
       const logoScale = 0.96 + (0.04 * logoReveal);
@@ -763,12 +799,16 @@
       document.documentElement.style.setProperty("--logoScale", logoScale.toFixed(3));
       document.documentElement.style.setProperty("--reveal", reveal.toFixed(3));
 
-      // Cache le hint quand le contenu est bien visible
+      // Hint
       const hint = document.querySelector(".scroll-hint");
       if (hint) hint.style.opacity = (progress < 0.20) ? "1" : "0";
 
-      // Snap automatique
-      if (!snapped && progress > 0.985) {
+      // ✅ Snap seulement si l’utilisateur scrolle vers le bas (plus naturel)
+      const y = window.scrollY || 0;
+      const scrollingDown = y > lastY;
+      lastY = y;
+
+      if (!snapped && scrollingDown && progress > 0.985) {
         snapped = true;
         const target = document.querySelector("#services");
         if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });

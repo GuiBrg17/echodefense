@@ -4,73 +4,68 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EchoDefense — Rendre visible pour mieux défendre</title>
-  <meta name="description" content="EchoDefense — rendre visible la surface d’attaque pour mieux défendre les entreprises." />
+  <meta name="description" content="EchoDefense — réduire la surface d’attaque en rendant l’exposition numérique visible et actionnable." />
 
   <style>
     :root{
-      --bg:#050814;
-      --panel:#080c1f;
-      --text:#eef3ff;
-      --muted:rgba(238,243,255,.68);
-      --border:rgba(255,255,255,.12);
-      --accent:#3bc7ff;
-      --accent2:#7cffc6;
+      /* Palette premium */
+      --bg:#070a12;
+      --panel:#0b0f1b;
+      --glass: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.10);
+      --text: rgba(244,247,255,.95);
+      --muted: rgba(244,247,255,.62);
+
+      /* Accent ultra discret (premium) */
+      --accent: rgba(244,247,255,.92);
+      --accent2: rgba(244,247,255,.70);
 
       --max: 1120px;
       --radius: 22px;
       --shadow: 0 40px 120px rgba(0,0,0,.55);
     }
 
-    *{ box-sizing:border-box }
-    html{ scroll-behavior:smooth }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color: var(--text);
-      background: var(--bg);
+      background:
+        radial-gradient(900px 650px at 15% 12%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(900px 650px at 85% 18%, rgba(255,255,255,.035), transparent 60%),
+        linear-gradient(180deg, #060914 0%, #070a12 60%, #060914 100%);
       overflow-x:hidden;
     }
-    a{ color:inherit; text-decoration:none }
-    p{ margin:0; color: var(--muted); line-height:1.7 }
 
-    /* Respect des préférences d’animation */
+    a{color:inherit; text-decoration:none}
+    p{margin:0; color:var(--muted); line-height:1.75}
+
     @media (prefers-reduced-motion: reduce){
-      *{ animation:none!important; transition:none!important; scroll-behavior:auto!important }
+      *{animation:none!important; transition:none!important; scroll-behavior:auto!important}
     }
 
-    /* ====== BACKDROP / GLOW (effet Rockstar-like mais original) ====== */
-    .backdrop{
-      position:fixed;
-      inset:-20vh -20vw;
-      z-index:-2;
-      background:
-        radial-gradient(900px 650px at 20% 10%, rgba(59,199,255,.20), transparent 60%),
-        radial-gradient(900px 650px at 82% 18%, rgba(124,255,198,.14), transparent 60%),
-        radial-gradient(1000px 800px at 50% 110%, rgba(155,120,255,.10), transparent 60%),
-        linear-gradient(180deg, #040717 0%, #050814 30%, #040717 100%);
-      transform: translate3d(0,0,0);
-    }
-
-    /* Film grain léger (option “cinéma”) */
+    /* ===== Grain subtil (ciné premium) ===== */
     .grain{
       position:fixed;
       inset:0;
       z-index:-1;
       pointer-events:none;
-      opacity:.08;
+      opacity:.07;
       background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
       mix-blend-mode: overlay;
     }
 
-    /* ====== NAV MINIMAL (apparaît après un peu de scroll) ====== */
+    /* ===== NAV flottante premium ===== */
     header{
       position:fixed;
       top:14px;
       left:50%;
-      transform: translateX(-50%);
+      transform:translateX(-50%);
       width:min(var(--max), calc(100% - 28px));
       z-index:50;
+
       opacity:0;
       pointer-events:none;
       transition: opacity .35s ease;
@@ -79,41 +74,51 @@
       opacity:1;
       pointer-events:auto;
     }
+
     .nav{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
+      gap:14px;
       padding:10px 12px;
       border:1px solid var(--border);
-      background: rgba(8,12,31,.55);
-      backdrop-filter: blur(10px);
+      background: rgba(11,15,27,.55);
+      backdrop-filter: blur(12px);
       border-radius: 999px;
-      box-shadow: 0 20px 70px rgba(0,0,0,.35);
+      box-shadow: 0 22px 80px rgba(0,0,0,.35);
     }
+
     .nav-left{
-      display:flex; align-items:center; gap:10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
       font-weight:900;
       letter-spacing:.2px;
+      white-space:nowrap;
     }
+
     .nav-logo{
-      width:30px;height:30px;
-      border-radius: 999px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.05);
+      width:30px;
+      height:30px;
+      border-radius:999px;
       padding:6px;
       object-fit:contain;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.05);
     }
+
     .nav-links{
       display:flex;
-      gap:14px;
-      flex-wrap:wrap;
       align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
+
     .nav-links a{
       font-size:13px;
-      font-weight:700;
-      color: rgba(238,243,255,.72);
+      font-weight:750;
+      color: rgba(244,247,255,.68);
       padding:8px 10px;
       border-radius:999px;
       transition: background .2s ease, color .2s ease, transform .2s ease;
@@ -124,7 +129,7 @@
       transform: translateY(-1px);
     }
 
-    /* ====== INTRO HERO 100vh ====== */
+    /* ===== HERO (plein écran) ===== */
     .hero{
       min-height:100vh;
       display:grid;
@@ -136,6 +141,7 @@
       width:min(var(--max), 100%);
       text-align:center;
     }
+
     .logo-big{
       width:min(260px, 60vw);
       height:auto;
@@ -144,10 +150,11 @@
       border:1px solid var(--border);
       background: rgba(255,255,255,.05);
       box-shadow: var(--shadow);
-      transform: translateY(8px) scale(.98);
       opacity:0;
+      transform: translateY(10px) scale(.98);
       animation: heroIn .9s ease forwards;
     }
+
     .brand{
       margin-top:18px;
       font-weight:950;
@@ -157,18 +164,18 @@
       transform: translateY(12px);
       animation: heroIn .9s ease .08s forwards;
     }
+
     .tagline{
       margin:10px auto 0;
       max-width: 760px;
-      font-weight:900;
-      font-size: clamp(16px, 2.2vw, 19px);
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip:text; background-clip:text;
-      color: transparent;
+      font-weight:850;
+      font-size: clamp(15px, 2.1vw, 18px);
+      color: rgba(244,247,255,.84);
       opacity:0;
       transform: translateY(12px);
       animation: heroIn .9s ease .16s forwards;
     }
+
     .hero-copy{
       margin:14px auto 0;
       max-width: 920px;
@@ -177,6 +184,7 @@
       transform: translateY(12px);
       animation: heroIn .9s ease .24s forwards;
     }
+
     .hero-actions{
       margin-top:26px;
       display:flex;
@@ -187,8 +195,9 @@
       transform: translateY(12px);
       animation: heroIn .9s ease .32s forwards;
     }
+
     @keyframes heroIn{
-      to{ opacity:1; transform: translateY(0) scale(1) }
+      to{opacity:1; transform: translateY(0) scale(1)}
     }
 
     .btn{
@@ -200,15 +209,19 @@
       font-weight:900;
       font-size:14px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.05);
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      background: rgba(255,255,255,.04);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, background .18s ease;
     }
     .btn.primary{
+      background: rgba(244,247,255,.92);
+      color:#070a12;
       border:none;
-      color:#061026;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
     }
-    .btn:hover{ transform: translateY(-2px); box-shadow: 0 20px 60px rgba(0,0,0,.35); filter: brightness(1.03) }
+    .btn:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 24px 70px rgba(0,0,0,.35);
+      filter: brightness(1.02);
+    }
     .btn:active{ transform: translateY(0) scale(.98) }
 
     .scroll-hint{
@@ -221,29 +234,29 @@
       align-items:center;
       gap:8px;
       font-size:12px;
-      color: rgba(238,243,255,.65);
+      color: rgba(244,247,255,.55);
       opacity:.95;
       user-select:none;
     }
     .mouse{
       width:22px;height:34px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
-      position:relative;background: rgba(255,255,255,.04);
+      position:relative;background: rgba(255,255,255,.03);
     }
     .mouse::after{
       content:"";
       width:4px;height:6px;border-radius:99px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background: rgba(244,247,255,.88);
       position:absolute; left:50%; top:7px;
       transform: translateX(-50%);
       animation: wheel 1.25s ease infinite;
     }
     @keyframes wheel{
-      0%{ opacity:.2; transform:translateX(-50%) translateY(0) }
-      40%{ opacity:1 }
-      100%{ opacity:.2; transform:translateX(-50%) translateY(10px) }
+      0%{opacity:.2; transform:translateX(-50%) translateY(0)}
+      40%{opacity:1}
+      100%{opacity:.2; transform:translateX(-50%) translateY(10px)}
     }
 
-    /* ====== SECTIONS “cinéma” (100vh, verticales, longues) ====== */
+    /* ===== SECTIONS VERTICALES (100vh) ===== */
     main{
       width:min(var(--max), calc(100% - 40px));
       margin:0 auto;
@@ -254,12 +267,13 @@
       min-height:100vh;
       display:grid;
       align-items:center;
-      padding: 90px 0;
+      padding: 96px 0;
       border-top: 1px solid rgba(255,255,255,.06);
     }
+
     .panel-inner{
       display:grid;
-      grid-template-columns: 1.2fr .8fr;
+      grid-template-columns: 1.15fr .85fr;
       gap:18px;
       align-items:start;
     }
@@ -274,36 +288,38 @@
       font-size:12px;
       letter-spacing:.18em;
       text-transform:uppercase;
-      color: rgba(238,243,255,.62);
+      color: rgba(244,247,255,.58);
       border:1px solid rgba(255,255,255,.12);
       padding: 8px 12px;
       border-radius:999px;
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.03);
     }
+
     .title{
       margin:14px 0 10px;
       font-size: clamp(26px, 3.4vw, 40px);
       letter-spacing:-.4px;
       line-height:1.08;
     }
+
     .lead{
       font-size:16px;
-      max-width: 70ch;
+      max-width: 72ch;
     }
 
     .card{
       border:1px solid var(--border);
-      background: rgba(8,12,31,.55);
-      backdrop-filter: blur(10px);
+      background: rgba(11,15,27,.55);
+      backdrop-filter: blur(12px);
       border-radius: var(--radius);
       padding: 18px;
-      box-shadow: 0 26px 90px rgba(0,0,0,.35);
+      box-shadow: 0 26px 90px rgba(0,0,0,.30);
       transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
     }
     .card:hover{
       transform: translateY(-4px);
-      border-color: rgba(255,255,255,.20);
-      box-shadow: 0 40px 120px rgba(0,0,0,.48);
+      border-color: rgba(255,255,255,.18);
+      box-shadow: 0 40px 120px rgba(0,0,0,.42);
     }
     .card h3{ margin:0 0 8px; font-size:16px }
     .card p{ font-size:14px }
@@ -314,19 +330,17 @@
       gap:14px;
       margin-top:18px;
     }
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-    }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
 
     .list{ margin-top:12px; display:grid; gap:10px }
     .li{ display:flex; gap:10px; font-size:14px; color: var(--muted) }
     .dot{
-      width:9px;height:9px;border-radius:99px; margin-top:7px; flex:0 0 auto;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 10px 30px rgba(59,199,255,.18);
+      width:8px;height:8px;border-radius:99px; margin-top:7px; flex:0 0 auto;
+      background: rgba(244,247,255,.88);
+      opacity:.85;
     }
 
-    /* ====== Reveal au scroll (comme Rockstar: le contenu apparaît petit à petit) ====== */
+    /* Reveal progressif */
     .reveal{
       opacity:0;
       transform: translateY(18px);
@@ -340,27 +354,27 @@
       filter: blur(0);
     }
 
-    /* ====== Parallax léger sur certains blocs ====== */
+    /* Parallax ultra subtil */
     .parallax{
       transform: translateY(var(--py, 0px));
       transition: transform .08s linear;
       will-change: transform;
     }
 
-    /* ====== Contact ====== */
+    /* Contact */
     label{
       display:block;
       margin:10px 0 6px;
       font-size:13px;
-      color: rgba(238,243,255,.65);
-      font-weight:700;
+      color: rgba(244,247,255,.58);
+      font-weight:750;
     }
     input, textarea{
       width:100%;
       padding:12px 12px;
       border-radius: 16px;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.03);
       color: var(--text);
       outline:none;
     }
@@ -371,7 +385,7 @@
       margin: 0 auto;
       padding: 26px 0 54px;
       text-align:center;
-      color: rgba(238,243,255,.55);
+      color: rgba(244,247,255,.50);
       font-size:12px;
       border-top:1px solid rgba(255,255,255,.06);
     }
@@ -379,7 +393,6 @@
 </head>
 
 <body>
-  <div class="backdrop" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
 
   <!-- NAV flottante -->
@@ -393,6 +406,7 @@
         <a href="#services">Services</a>
         <a href="#methode">Méthode</a>
         <a href="#benefices">Bénéfices</a>
+        <a href="#apropos">À propos</a>
         <a href="#contact">Contact</a>
       </div>
     </div>
@@ -405,31 +419,31 @@
       <div class="brand">EchoDefense</div>
       <div class="tagline">Rendre visible pour mieux défendre.</div>
       <p class="hero-copy">
-        Maquette de service cybersécurité : création d’un “jumeau” de l’empreinte numérique visible,
-        pour détecter les actifs oubliés, les expositions et guider la réduction de surface d’attaque.
+        Maquette de service cybersécurité : rendre l’exposition numérique visible et actionnable,
+        afin de réduire la surface d’attaque des entreprises.
       </p>
       <div class="hero-actions">
-        <a class="btn primary" href="#services">Scroll / Découvrir</a>
+        <a class="btn primary" href="#services">Découvrir</a>
         <a class="btn" href="#contact">Demande de démo (fictive)</a>
       </div>
     </div>
 
     <div class="scroll-hint" aria-hidden="true">
       <div class="mouse"></div>
-      <div>Scroll for more</div>
+      <div>Scroll pour découvrir</div>
     </div>
   </section>
 
   <main>
-    <!-- PANEL 1 -->
+    <!-- SERVICES -->
     <section class="panel" id="services">
       <div class="panel-inner">
-        <div class="parallax" data-parallax="0.18">
+        <div class="parallax" data-parallax="0.16">
           <span class="kicker reveal">Services</span>
-          <h2 class="title reveal">Une offre lisible, préventive, orientée action</h2>
+          <h2 class="title reveal">Une offre lisible, orientée prévention</h2>
           <p class="lead reveal">
-            Objectif : rendre visible ce qui est exposé, détecter les écarts, prioriser les corrections,
-            et accompagner la remédiation.
+            EchoDefense se concentre sur la réduction de surface d’attaque : inventorier l’exposition,
+            détecter les écarts, prioriser les actions et accompagner la correction.
           </p>
 
           <div class="grid">
@@ -447,7 +461,7 @@
             </div>
             <div class="card reveal">
               <h3>Accompagnement</h3>
-              <p>Pédagogie + conseils d’hygiène (MFA, durcissement, accès, sauvegardes).</p>
+              <p>Pédagogie + recommandations d’hygiène (MFA, accès, sauvegardes, durcissement).</p>
             </div>
           </div>
         </div>
@@ -461,14 +475,17 @@
             <div class="li"><span class="dot"></span><span>Technologies & configurations visibles</span></div>
             <div class="li"><span class="dot"></span><span>Actifs oubliés (shadow IT)</span></div>
           </div>
+          <p style="margin-top:12px; color:rgba(244,247,255,.52); font-size:12px">
+            *Site de démonstration pour entretien / projet pédagogique.
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- PANEL 2 -->
+    <!-- MÉTHODE -->
     <section class="panel" id="methode">
       <div class="panel-inner">
-        <div class="card reveal parallax" data-parallax="0.22">
+        <div class="card reveal parallax" data-parallax="0.18">
           <span class="kicker">Méthode</span>
           <h2 class="title">Du constat à la réduction du risque</h2>
           <p class="lead">
@@ -492,16 +509,16 @@
           </div>
           <div class="card reveal">
             <h3>4) Maintien</h3>
-            <p>Surveillance pour éviter les retours en arrière et les nouveaux angles morts.</p>
+            <p>Surveiller pour éviter les retours en arrière et les nouveaux angles morts.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- PANEL 3 -->
+    <!-- BÉNÉFICES -->
     <section class="panel" id="benefices">
       <div class="panel-inner">
-        <div class="parallax" data-parallax="0.18">
+        <div class="parallax" data-parallax="0.14">
           <span class="kicker reveal">Bénéfices</span>
           <h2 class="title reveal">Pourquoi c’est utile (même pour une PME)</h2>
           <p class="lead reveal">
@@ -517,7 +534,7 @@
           </div>
           <div class="card reveal">
             <h3>Priorisation claire</h3>
-            <p>On guide vers les actions à impact, pas juste un “scan”.</p>
+            <p>On guide vers les actions à impact, pas seulement un “scan”.</p>
           </div>
           <div class="card reveal">
             <h3>Prévention continue</h3>
@@ -531,10 +548,32 @@
       </div>
     </section>
 
+    <!-- À PROPOS -->
+    <section class="panel" id="apropos">
+      <div class="panel-inner">
+        <div class="parallax" data-parallax="0.12">
+          <span class="kicker reveal">À propos</span>
+          <h2 class="title reveal">Projet fictif, vision concrète</h2>
+          <p class="lead reveal">
+            Cette maquette a été conçue pour un entretien de formation : elle présente un projet professionnel
+            orienté cybersécurité, prévention et réduction de surface d’attaque.
+          </p>
+        </div>
+
+        <div class="card reveal">
+          <h3>Positionnement</h3>
+          <p>
+            EchoDefense se place côté prévention : rendre l’exposition visible, prioriser les risques,
+            accompagner la remédiation avec une approche claire et pédagogique.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <!-- CONTACT -->
     <section class="panel" id="contact">
       <div class="panel-inner">
-        <div class="parallax" data-parallax="0.16">
+        <div class="parallax" data-parallax="0.12">
           <span class="kicker reveal">Contact</span>
           <h2 class="title reveal">Demande de démo (fictive)</h2>
           <p class="lead reveal">Formulaire de démonstration (aucune donnée envoyée). Idéal pour ton entretien.</p>
@@ -552,13 +591,15 @@
                 <input type="email" placeholder="vous@entreprise.fr" />
               </div>
             </div>
+
             <div>
               <label>Message</label>
               <textarea placeholder="Décrivez votre besoin (fictif)"></textarea>
             </div>
+
             <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
               <button class="btn primary" type="submit">Envoyer</button>
-              <span style="color:rgba(238,243,255,.55); font-size:12px">Aucune donnée n’est envoyée.</span>
+              <span style="color:rgba(244,247,255,.50); font-size:12px">Aucune donnée n’est envoyée.</span>
             </div>
           </form>
         </div>
@@ -576,21 +617,16 @@
 
     // NAV apparaît après un peu de scroll
     const nav = document.getElementById("topnav");
-    const showNavAfter = 160; // px
-    const onScroll = () => {
-      nav.classList.toggle("show", window.scrollY > showNavAfter);
-    };
-    window.addEventListener("scroll", onScroll, { passive:true });
-    onScroll();
+    const showNavAfter = 180;
+    const navTick = () => nav.classList.toggle("show", window.scrollY > showNavAfter);
+    window.addEventListener("scroll", navTick, { passive:true });
+    navTick();
 
     // Reveal au scroll
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
     if (!prefersReduced) {
       const io = new IntersectionObserver((entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) e.target.classList.add("visible");
-        }
+        for (const e of entries) if (e.isIntersecting) e.target.classList.add("visible");
       }, { threshold: 0.14 });
 
       document.querySelectorAll(".reveal").forEach(el => io.observe(el));
@@ -598,15 +634,15 @@
       document.querySelectorAll(".reveal").forEach(el => el.classList.add("visible"));
     }
 
-    // Parallax léger (optionnel, façon “cinéma”)
+    // Parallax très subtil (premium)
     const parallaxEls = [...document.querySelectorAll("[data-parallax]")];
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
     const parallaxTick = () => {
       const y = window.scrollY || 0;
       for (const el of parallaxEls) {
-        const speed = parseFloat(el.getAttribute("data-parallax")) || 0.18;
-        // petite translation (plafonnée) pour garder ça subtil
-        const offset = Math.max(-28, Math.min(28, -y * speed * 0.04));
+        const speed = parseFloat(el.getAttribute("data-parallax")) || 0.12;
+        const offset = clamp(-y * speed * 0.03, -22, 22);
         el.style.setProperty("--py", offset.toFixed(2) + "px");
       }
     };

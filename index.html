@@ -17,11 +17,15 @@
       --radius: 22px;
       --shadow: 0 40px 120px rgba(0,0,0,.55);
 
-      /* ✅ AU CHARGEMENT : net + visible */
-      --introScale: 1;            /* zoom initial */
-      --introBlur: 0px;           /* pas de flou */
-      --introFade: 1;             /* texte visible */
-      --introTint: 0.35;          /* voile léger */
+      /* ===== Intro Globe (piloté par JS) ===== */
+      --introTint: 0.65;
+      --globeScale: 1;
+      --globeY: 0px;
+
+      /* Apparition progressive du contenu */
+      --reveal: 0;       /* texte + boutons */
+      --logoReveal: 0;   /* logo EchoDefense */
+      --logoScale: 0.96; /* micro effet */
     }
 
     *{box-sizing:border-box}
@@ -63,7 +67,6 @@
       transform:translateX(-50%);
       width:min(var(--max), calc(100% - 28px));
       z-index:50;
-
       opacity:0;
       pointer-events:none;
       transition: opacity .35s ease;
@@ -128,10 +131,10 @@
     }
 
     /* =========================
-       INTRO “ZOOM DANS LE LOGO”
+       INTRO GLOBE (zoom + reveal)
     ========================= */
     .intro{
-      height: 240vh; /* ✅ plus long = zoom plus smooth */
+      height: 240vh;
       position:relative;
     }
 
@@ -145,6 +148,7 @@
       overflow:hidden;
     }
 
+    /* Voile sombre (piloté par JS) */
     .intro-sticky::before{
       content:"";
       position:absolute;
@@ -154,6 +158,40 @@
       pointer-events:none;
     }
 
+    /* Globe = couche 0 (zoom au scroll) */
+    .globe{
+      position:absolute;
+      inset:0;
+      z-index:0;
+
+      background: radial-gradient(900px 650px at 50% 45%, rgba(0,0,0,.15), rgba(0,0,0,.75));
+
+      transform: scale(var(--globeScale)) translateY(var(--globeY));
+      will-change: transform;
+    }
+
+    /* Calque globe vivant (rotation + respiration) */
+    .globe::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: url("Globe.png") center/420px no-repeat;
+      transform-origin: 50% 50%;
+      animation: globeRotate 70s linear infinite, globeBreath 7.5s ease-in-out infinite;
+    }
+
+    @keyframes globeRotate{
+      from{ transform: rotate(0deg); }
+      to  { transform: rotate(360deg); }
+    }
+    @keyframes globeBreath{
+      0%, 100% { opacity: .92; }
+      50%      { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .globe::after{ animation: none; }
+    }
+
     .intro-inner{
       width:min(var(--max), 100%);
       text-align:center;
@@ -161,11 +199,12 @@
       z-index:2;
     }
 
+    /* Logo EchoDefense : apparaît avant le texte */
     .zoom-wrap{
       display:inline-block;
-      transform: scale(var(--introScale));
-      filter: blur(var(--introBlur));
-      will-change: transform, filter;
+      opacity: var(--logoReveal);
+      transform: scale(var(--logoScale));
+      will-change: opacity, transform;
     }
 
     .logo-big{
@@ -180,14 +219,14 @@
       margin: 0 auto;
     }
 
-    /* ✅ Pendant le zoom IN, on fait DISPARAÎTRE le texte */
+    /* Texte/boutons apparaissent ensuite */
     .brand{
       margin-top:18px;
       font-weight:950;
       letter-spacing:-.6px;
       font-size: clamp(38px, 7vw, 64px);
-      opacity: var(--introFade);
-      transform: translateY(calc((1 - var(--introFade)) * 10px));
+      opacity: var(--reveal);
+      transform: translateY(calc((1 - var(--reveal)) * 14px));
       transition: opacity .05s linear, transform .05s linear;
     }
 
@@ -197,8 +236,8 @@
       font-weight:850;
       font-size: clamp(15px, 2.1vw, 18px);
       color: rgba(244,247,255,.84);
-      opacity: var(--introFade);
-      transform: translateY(calc((1 - var(--introFade)) * 10px));
+      opacity: var(--reveal);
+      transform: translateY(calc((1 - var(--reveal)) * 14px));
       transition: opacity .05s linear, transform .05s linear;
     }
 
@@ -206,8 +245,8 @@
       margin:14px auto 0;
       max-width: 920px;
       font-size: clamp(15px, 2vw, 17px);
-      opacity: var(--introFade);
-      transform: translateY(calc((1 - var(--introFade)) * 10px));
+      opacity: var(--reveal);
+      transform: translateY(calc((1 - var(--reveal)) * 14px));
       transition: opacity .05s linear, transform .05s linear;
     }
 
@@ -217,8 +256,8 @@
       gap:12px;
       flex-wrap:wrap;
       justify-content:center;
-      opacity: var(--introFade);
-      transform: translateY(calc((1 - var(--introFade)) * 10px));
+      opacity: var(--reveal);
+      transform: translateY(calc((1 - var(--reveal)) * 14px));
       transition: opacity .05s linear, transform .05s linear;
     }
 
@@ -247,7 +286,6 @@
     }
     .btn:active{ transform: translateY(0) scale(.98) }
 
-    /* ✅ Hint visible au début, disparaît pendant le zoom */
     .scroll-hint{
       position:absolute;
       bottom: 18px;
@@ -259,8 +297,8 @@
       gap:8px;
       font-size:12px;
       color: rgba(244,247,255,.55);
-      opacity: var(--introFade);
-      transition: opacity .05s linear;
+      opacity: 1;
+      transition: opacity .2s ease;
       user-select:none;
       z-index:2;
       pointer-events:none;
@@ -442,11 +480,13 @@
     </div>
   </header>
 
-  <!-- INTRO ZOOM -->
+  <!-- INTRO (Globe -> Zoom -> Reveal -> Snap) -->
   <section class="intro" id="home">
     <div class="intro-sticky">
+      <div class="globe" aria-hidden="true"></div>
+
       <div class="intro-inner">
-        <div class="zoom-wrap" aria-hidden="false">
+        <div class="zoom-wrap">
           <img class="logo-big" src="logo-echodefense.png" alt="Logo EchoDefense" />
         </div>
 
@@ -676,49 +716,54 @@
       setTimeout(() => status.classList.remove("show"), 4500);
     });
 
-    // ===== Zoom IN dans le logo + Snap =====
+    // ===== Globe zoom + reveal + snap =====
     const intro = document.querySelector(".intro");
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-
     let snapped = false;
 
     const updateIntro = () => {
       if (prefersReduced) {
-        document.documentElement.style.setProperty("--introScale", "1");
-        document.documentElement.style.setProperty("--introBlur", "0px");
-        document.documentElement.style.setProperty("--introFade", "1");
         document.documentElement.style.setProperty("--introTint", "0.35");
+        document.documentElement.style.setProperty("--globeScale", "1");
+        document.documentElement.style.setProperty("--globeY", "0px");
+        document.documentElement.style.setProperty("--reveal", "1");
+        document.documentElement.style.setProperty("--logoReveal", "1");
+        document.documentElement.style.setProperty("--logoScale", "1");
         return;
       }
 
       const rect = intro.getBoundingClientRect();
-      const progress = clamp((-rect.top) / (window.innerHeight), 0, 1);
+      const progress = clamp((-rect.top) / window.innerHeight, 0, 1);
 
-      // ✅ Zoom IN : 1.0 -> 2.8 (on "rentre" dans le logo)
-      const scale = 1.0 + (1.8 * progress);
+      // Globe zoom IN
+      const globeScale = 1 + (1.9 * progress);    // ajuste si besoin: 1.6 (doux) → 2.2 (wow)
+      const globeY = (progress * -18).toFixed(2) + "px";
 
-      // ✅ Blur très léger seulement pendant le zoom (sinon mets 0 partout)
-      const blur = 0 + (4 * progress);
+      // Voile sombre diminue
+      const tint = 0.65 - (0.35 * progress);
 
-      // ✅ Le texte disparaît pendant le zoom
-      const fade = 1 - clamp((progress - 0.10) / 0.55, 0, 1);
+      // Apparition en étapes
+      const logoReveal = clamp((progress - 0.18) / 0.25, 0, 1);
+      const reveal = clamp((progress - 0.35) / 0.45, 0, 1);
+      const logoScale = 0.96 + (0.04 * logoReveal);
 
-      // ✅ Voile sombre augmente un peu (ciné)
-      const tint = 0.35 + (0.18 * progress);
-
-      document.documentElement.style.setProperty("--introScale", scale.toFixed(3));
-      document.documentElement.style.setProperty("--introBlur", blur.toFixed(2) + "px");
-      document.documentElement.style.setProperty("--introFade", fade.toFixed(3));
+      document.documentElement.style.setProperty("--globeScale", globeScale.toFixed(3));
+      document.documentElement.style.setProperty("--globeY", globeY);
       document.documentElement.style.setProperty("--introTint", tint.toFixed(3));
+      document.documentElement.style.setProperty("--logoReveal", logoReveal.toFixed(3));
+      document.documentElement.style.setProperty("--logoScale", logoScale.toFixed(3));
+      document.documentElement.style.setProperty("--reveal", reveal.toFixed(3));
 
-      // ✅ Snap automatique vers #services quand fin du zoom
+      // Cache le hint quand le contenu est bien visible
+      const hint = document.querySelector(".scroll-hint");
+      if (hint) hint.style.opacity = (progress < 0.20) ? "1" : "0";
+
+      // Snap automatique
       if (!snapped && progress > 0.985) {
         snapped = true;
         const target = document.querySelector("#services");
         if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-
-      // Réactive le snap si on remonte bien au début
       if (progress < 0.20) snapped = false;
     };
 

@@ -16,10 +16,6 @@
       --text: rgba(244,247,255,.95);
       --muted: rgba(244,247,255,.62);
 
-      /* Accent ultra discret (premium) */
-      --accent: rgba(244,247,255,.92);
-      --accent2: rgba(244,247,255,.70);
-
       --max: 1120px;
       --radius: 22px;
       --shadow: 0 40px 120px rgba(0,0,0,.55);
@@ -45,7 +41,7 @@
       *{animation:none!important; transition:none!important; scroll-behavior:auto!important}
     }
 
-    /* ===== Grain subtil (ciné premium) ===== */
+    /* Grain subtil */
     .grain{
       position:fixed;
       inset:0;
@@ -57,7 +53,7 @@
       mix-blend-mode: overlay;
     }
 
-    /* ===== NAV flottante premium ===== */
+    /* NAV flottante */
     header{
       position:fixed;
       top:14px;
@@ -129,7 +125,7 @@
       transform: translateY(-1px);
     }
 
-    /* ===== HERO (plein écran) ===== */
+    /* HERO plein écran */
     .hero{
       min-height:100vh;
       display:grid;
@@ -142,8 +138,9 @@
       text-align:center;
     }
 
+    /* LOGO PLUS GRAND ICI */
     .logo-big{
-      width:min(260px, 60vw);
+      width:min(320px, 70vw);  /* <- augmenté */
       height:auto;
       border-radius: 28px;
       padding: 18px;
@@ -210,7 +207,8 @@
       font-size:14px;
       border:1px solid var(--border);
       background: rgba(255,255,255,.04);
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, background .18s ease;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      cursor:pointer;
     }
     .btn.primary{
       background: rgba(244,247,255,.92);
@@ -256,7 +254,7 @@
       100%{opacity:.2; transform:translateX(-50%) translateY(10px)}
     }
 
-    /* ===== SECTIONS VERTICALES (100vh) ===== */
+    /* Sections verticales */
     main{
       width:min(var(--max), calc(100% - 40px));
       margin:0 auto;
@@ -380,6 +378,15 @@
     }
     textarea{ min-height:130px; resize:vertical }
 
+    .status{
+      margin-top:12px;
+      font-size:12px;
+      color: rgba(244,247,255,.55);
+      display:none;
+    }
+    .status.show{ display:block; }
+    .status.ok{ color: rgba(244,247,255,.75); }
+
     footer{
       width:min(var(--max), calc(100% - 40px));
       margin: 0 auto;
@@ -419,12 +426,12 @@
       <div class="brand">EchoDefense</div>
       <div class="tagline">Rendre visible pour mieux défendre.</div>
       <p class="hero-copy">
-        Maquette de service cybersécurité : rendre l’exposition numérique visible et actionnable,
-        afin de réduire la surface d’attaque des entreprises.
+        Nous aidons les entreprises à rendre leur exposition numérique visible et actionnable,
+        afin de réduire la surface d’attaque et limiter les risques.
       </p>
       <div class="hero-actions">
         <a class="btn primary" href="#services">Découvrir</a>
-        <a class="btn" href="#contact">Demande de démo (fictive)</a>
+        <a class="btn" href="#contact">Demander une démo</a>
       </div>
     </div>
 
@@ -467,7 +474,7 @@
         </div>
 
         <div class="card reveal">
-          <h3>Ce que l’on “duplique”</h3>
+          <h3>Ce que nous cartographions</h3>
           <p>Une vue proche de ce qu’un attaquant observe depuis Internet.</p>
           <div class="list">
             <div class="li"><span class="dot"></span><span>Domaines, sous-domaines, certificats</span></div>
@@ -475,9 +482,6 @@
             <div class="li"><span class="dot"></span><span>Technologies & configurations visibles</span></div>
             <div class="li"><span class="dot"></span><span>Actifs oubliés (shadow IT)</span></div>
           </div>
-          <p style="margin-top:12px; color:rgba(244,247,255,.52); font-size:12px">
-            *Site de démonstration pour entretien / projet pédagogique.
-          </p>
         </div>
       </div>
     </section>
@@ -489,7 +493,7 @@
           <span class="kicker">Méthode</span>
           <h2 class="title">Du constat à la réduction du risque</h2>
           <p class="lead">
-            On compare la “vue attendue” à la “vue exposée” pour isoler les écarts,
+            Nous comparons la “vue attendue” à la “vue exposée” pour isoler les écarts,
             corriger, puis vérifier en continu.
           </p>
         </div>
@@ -501,7 +505,7 @@
           </div>
           <div class="card reveal">
             <h3>2) Analyse</h3>
-            <p>Identifier les écarts (actifs oubliés, config risquée, services non nécessaires).</p>
+            <p>Identifier les écarts (actifs oubliés, configuration risquée, services non nécessaires).</p>
           </div>
           <div class="card reveal">
             <h3>3) Réduction</h3>
@@ -520,10 +524,10 @@
       <div class="panel-inner">
         <div class="parallax" data-parallax="0.14">
           <span class="kicker reveal">Bénéfices</span>
-          <h2 class="title reveal">Pourquoi c’est utile (même pour une PME)</h2>
+          <h2 class="title reveal">Clarté, priorisation, prévention</h2>
           <p class="lead reveal">
             Beaucoup d’incidents partent de l’inconnu : actifs oubliés, exposition involontaire,
-            mauvaises configs. EchoDefense vise à les rendre visibles et corrigeables.
+            mauvaises configurations. Notre approche vise à les rendre visibles et corrigeables.
           </p>
         </div>
 
@@ -534,11 +538,11 @@
           </div>
           <div class="card reveal">
             <h3>Priorisation claire</h3>
-            <p>On guide vers les actions à impact, pas seulement un “scan”.</p>
+            <p>Nous guidons vers les actions à impact, pas seulement un “scan”.</p>
           </div>
           <div class="card reveal">
             <h3>Prévention continue</h3>
-            <p>On détecte les changements avant exploitation.</p>
+            <p>Nous détectons les changements avant exploitation.</p>
           </div>
           <div class="card reveal">
             <h3>Pédagogie</h3>
@@ -553,17 +557,17 @@
       <div class="panel-inner">
         <div class="parallax" data-parallax="0.12">
           <span class="kicker reveal">À propos</span>
-          <h2 class="title reveal">Projet fictif, vision concrète</h2>
+          <h2 class="title reveal">Une approche orientée résultat</h2>
           <p class="lead reveal">
-            Cette maquette a été conçue pour un entretien de formation : elle présente un projet professionnel
-            orienté cybersécurité, prévention et réduction de surface d’attaque.
+            EchoDefense aide les organisations à réduire leur exposition et à maintenir une posture de sécurité
+            plus robuste dans la durée.
           </p>
         </div>
 
         <div class="card reveal">
           <h3>Positionnement</h3>
           <p>
-            EchoDefense se place côté prévention : rendre l’exposition visible, prioriser les risques,
+            Prévention et réduction de surface d’attaque : rendre l’exposition visible, prioriser les risques,
             accompagner la remédiation avec une approche claire et pédagogique.
           </p>
         </div>
@@ -575,31 +579,31 @@
       <div class="panel-inner">
         <div class="parallax" data-parallax="0.12">
           <span class="kicker reveal">Contact</span>
-          <h2 class="title reveal">Demande de démo (fictive)</h2>
-          <p class="lead reveal">Formulaire de démonstration (aucune donnée envoyée). Idéal pour ton entretien.</p>
+          <h2 class="title reveal">Demander une démo</h2>
+          <p class="lead reveal">Laissez-nous un message et nous vous recontactons rapidement.</p>
         </div>
 
         <div class="card reveal">
-          <form onsubmit="event.preventDefault(); alert('Merci ! (Formulaire fictif pour démonstration)');">
+          <form id="contactForm">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
               <div>
                 <label>Nom</label>
-                <input placeholder="Votre nom" />
+                <input name="name" placeholder="Votre nom" required />
               </div>
               <div>
                 <label>Email</label>
-                <input type="email" placeholder="vous@entreprise.fr" />
+                <input name="email" type="email" placeholder="vous@entreprise.fr" required />
               </div>
             </div>
 
             <div>
               <label>Message</label>
-              <textarea placeholder="Décrivez votre besoin (fictif)"></textarea>
+              <textarea name="message" placeholder="Décrivez votre besoin" required></textarea>
             </div>
 
             <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
               <button class="btn primary" type="submit">Envoyer</button>
-              <span style="color:rgba(244,247,255,.50); font-size:12px">Aucune donnée n’est envoyée.</span>
+              <span id="status" class="status ok">Message envoyé. Nous vous répondrons dès que possible.</span>
             </div>
           </form>
         </div>
@@ -608,7 +612,7 @@
   </main>
 
   <footer>
-    © <span id="y"></span> EchoDefense — Site de démonstration (projet pédagogique)
+    © <span id="y"></span> EchoDefense — Tous droits réservés
   </footer>
 
   <script>
@@ -637,7 +641,6 @@
     // Parallax très subtil (premium)
     const parallaxEls = [...document.querySelectorAll("[data-parallax]")];
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-
     const parallaxTick = () => {
       const y = window.scrollY || 0;
       for (const el of parallaxEls) {
@@ -646,9 +649,18 @@
         el.style.setProperty("--py", offset.toFixed(2) + "px");
       }
     };
-
     window.addEventListener("scroll", () => requestAnimationFrame(parallaxTick), { passive:true });
     parallaxTick();
+
+    // Form: confirmation “comme un vrai” (sans backend)
+    const form = document.getElementById("contactForm");
+    const status = document.getElementById("status");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      status.classList.add("show");
+      form.reset();
+      setTimeout(() => status.classList.remove("show"), 4500);
+    });
   </script>
 </body>
 </html>

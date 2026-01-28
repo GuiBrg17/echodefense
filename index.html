@@ -8,10 +8,7 @@
 
   <style>
     :root{
-      /* Palette premium */
       --bg:#070a12;
-      --panel:#0b0f1b;
-      --glass: rgba(255,255,255,.06);
       --border: rgba(255,255,255,.10);
       --text: rgba(244,247,255,.95);
       --muted: rgba(244,247,255,.62);
@@ -19,6 +16,12 @@
       --max: 1120px;
       --radius: 22px;
       --shadow: 0 40px 120px rgba(0,0,0,.55);
+
+      /* Variables animées par JS (zoom intro) */
+      --introScale: 2.2;          /* zoom initial */
+      --introBlur: 10px;          /* flou initial */
+      --introFade: 0;             /* 0 -> 1 */
+      --introTint: 0.55;          /* voile sombre */
     }
 
     *{box-sizing:border-box}
@@ -33,7 +36,6 @@
         linear-gradient(180deg, #060914 0%, #070a12 60%, #060914 100%);
       overflow-x:hidden;
     }
-
     a{color:inherit; text-decoration:none}
     p{margin:0; color:var(--muted); line-height:1.75}
 
@@ -45,7 +47,7 @@
     .grain{
       position:fixed;
       inset:0;
-      z-index:-1;
+      z-index:-2;
       pointer-events:none;
       opacity:.07;
       background-image:
@@ -125,41 +127,72 @@
       transform: translateY(-1px);
     }
 
-    /* HERO plein écran */
-    .hero{
-      min-height:100vh;
+    /* =========================
+       INTRO “ZOOM DANS LE LOGO”
+       (style Rockstar-like)
+    ========================= */
+    .intro{
+      height: 200vh; /* important : donne la “place” pour le zoom au scroll */
+      position:relative;
+    }
+
+    .intro-sticky{
+      position:sticky;
+      top:0;
+      height:100vh;
       display:grid;
       place-items:center;
       padding: 80px 20px 34px;
-      position:relative;
-    }
-    .hero-inner{
-      width:min(var(--max), 100%);
-      text-align:center;
+      overflow:hidden;
     }
 
-    /* LOGO PLUS GRAND ICI */
+    /* Voile sombre qui diminue en scrollant */
+    .intro-sticky::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background: rgba(0,0,0,var(--introTint));
+      z-index:1;
+      pointer-events:none;
+      transition: opacity .1s linear;
+    }
+
+    .intro-inner{
+      width:min(var(--max), 100%);
+      text-align:center;
+      position:relative;
+      z-index:2;
+    }
+
+    /* Le “zoom” est appliqué sur ce bloc */
+    .zoom-wrap{
+      display:inline-block;
+      transform: scale(var(--introScale));
+      filter: blur(var(--introBlur));
+      will-change: transform, filter;
+    }
+
     .logo-big{
-      width:min(320px, 70vw);  /* <- augmenté */
+      width:min(320px, 70vw);
       height:auto;
       border-radius: 28px;
       padding: 18px;
       border:1px solid var(--border);
       background: rgba(255,255,255,.05);
       box-shadow: var(--shadow);
-      opacity:0;
-      transform: translateY(10px) scale(.98);
-      animation: heroIn .9s ease forwards;
+      display:block;
+      margin: 0 auto;
     }
 
+    /* Le texte apparaît progressivement quand on “dézoome” */
     .brand{
       margin-top:18px;
       font-weight:950;
       letter-spacing:-.6px;
       font-size: clamp(38px, 7vw, 64px);
-      opacity:0;
-      transform: translateY(12px);
-      animation: heroIn .9s ease .08s forwards;
+      opacity: var(--introFade);
+      transform: translateY(calc((1 - var(--introFade)) * 10px));
+      transition: opacity .05s linear, transform .05s linear;
     }
 
     .tagline{
@@ -168,18 +201,18 @@
       font-weight:850;
       font-size: clamp(15px, 2.1vw, 18px);
       color: rgba(244,247,255,.84);
-      opacity:0;
-      transform: translateY(12px);
-      animation: heroIn .9s ease .16s forwards;
+      opacity: var(--introFade);
+      transform: translateY(calc((1 - var(--introFade)) * 10px));
+      transition: opacity .05s linear, transform .05s linear;
     }
 
     .hero-copy{
       margin:14px auto 0;
       max-width: 920px;
       font-size: clamp(15px, 2vw, 17px);
-      opacity:0;
-      transform: translateY(12px);
-      animation: heroIn .9s ease .24s forwards;
+      opacity: var(--introFade);
+      transform: translateY(calc((1 - var(--introFade)) * 10px));
+      transition: opacity .05s linear, transform .05s linear;
     }
 
     .hero-actions{
@@ -188,13 +221,9 @@
       gap:12px;
       flex-wrap:wrap;
       justify-content:center;
-      opacity:0;
-      transform: translateY(12px);
-      animation: heroIn .9s ease .32s forwards;
-    }
-
-    @keyframes heroIn{
-      to{opacity:1; transform: translateY(0) scale(1)}
+      opacity: var(--introFade);
+      transform: translateY(calc((1 - var(--introFade)) * 10px));
+      transition: opacity .05s linear, transform .05s linear;
     }
 
     .btn{
@@ -233,8 +262,11 @@
       gap:8px;
       font-size:12px;
       color: rgba(244,247,255,.55);
-      opacity:.95;
+      opacity: calc(1 - var(--introFade));
+      transition: opacity .05s linear;
       user-select:none;
+      z-index:2;
+      pointer-events:none;
     }
     .mouse{
       width:22px;height:34px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
@@ -254,7 +286,9 @@
       100%{opacity:.2; transform:translateX(-50%) translateY(10px)}
     }
 
-    /* Sections verticales */
+    /* =========================
+       SECTIONS VERTICALES
+    ========================= */
     main{
       width:min(var(--max), calc(100% - 40px));
       margin:0 auto;
@@ -338,7 +372,7 @@
       opacity:.85;
     }
 
-    /* Reveal progressif */
+    /* Reveal progressif sections */
     .reveal{
       opacity:0;
       transform: translateY(18px);
@@ -350,13 +384,6 @@
       opacity:1;
       transform: translateY(0);
       filter: blur(0);
-    }
-
-    /* Parallax ultra subtil */
-    .parallax{
-      transform: translateY(var(--py, 0px));
-      transition: transform .08s linear;
-      will-change: transform;
     }
 
     /* Contact */
@@ -385,7 +412,6 @@
       display:none;
     }
     .status.show{ display:block; }
-    .status.ok{ color: rgba(244,247,255,.75); }
 
     footer{
       width:min(var(--max), calc(100% - 40px));
@@ -419,25 +445,31 @@
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="hero" id="home">
-    <div class="hero-inner">
-      <img class="logo-big" src="logo-echodefense.png" alt="Logo EchoDefense" />
-      <div class="brand">EchoDefense</div>
-      <div class="tagline">Rendre visible pour mieux défendre.</div>
-      <p class="hero-copy">
-        Nous aidons les entreprises à rendre leur exposition numérique visible et actionnable,
-        afin de réduire la surface d’attaque et limiter les risques.
-      </p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#services">Découvrir</a>
-        <a class="btn" href="#contact">Demander une démo</a>
-      </div>
-    </div>
+  <!-- INTRO ZOOM -->
+  <section class="intro" id="home">
+    <div class="intro-sticky">
+      <div class="intro-inner">
+        <div class="zoom-wrap" aria-hidden="false">
+          <img class="logo-big" src="logo-echodefense.png" alt="Logo EchoDefense" />
+        </div>
 
-    <div class="scroll-hint" aria-hidden="true">
-      <div class="mouse"></div>
-      <div>Scroll pour découvrir</div>
+        <div class="brand">EchoDefense</div>
+        <div class="tagline">Rendre visible pour mieux défendre.</div>
+        <p class="hero-copy">
+          Nous aidons les entreprises à rendre leur exposition numérique visible et actionnable,
+          afin de réduire la surface d’attaque et limiter les risques.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn primary" href="#services">Découvrir</a>
+          <a class="btn" href="#contact">Demander une démo</a>
+        </div>
+      </div>
+
+      <div class="scroll-hint" aria-hidden="true">
+        <div class="mouse"></div>
+        <div>Scroll pour découvrir</div>
+      </div>
     </div>
   </section>
 
@@ -445,7 +477,7 @@
     <!-- SERVICES -->
     <section class="panel" id="services">
       <div class="panel-inner">
-        <div class="parallax" data-parallax="0.16">
+        <div>
           <span class="kicker reveal">Services</span>
           <h2 class="title reveal">Une offre lisible, orientée prévention</h2>
           <p class="lead reveal">
@@ -467,8 +499,8 @@
               <p>Priorisation par risque + quick wins + suivi des corrections.</p>
             </div>
             <div class="card reveal">
-              <h3>Accompagnement</h3>
-              <p>Pédagogie + recommandations d’hygiène (MFA, accès, sauvegardes, durcissement).</p>
+              <h3>Déception (leurres contrôlés)</h3>
+              <p>Leurres, honeytokens, honeypots : détection plus tôt et investigation en environnement maîtrisé.</p>
             </div>
           </div>
         </div>
@@ -489,31 +521,31 @@
     <!-- MÉTHODE -->
     <section class="panel" id="methode">
       <div class="panel-inner">
-        <div class="card reveal parallax" data-parallax="0.18">
+        <div class="card reveal">
           <span class="kicker">Méthode</span>
-          <h2 class="title">Du constat à la réduction du risque</h2>
+          <h2 class="title">Du jumeau numérique à la réduction du risque</h2>
           <p class="lead">
-            Nous comparons la “vue attendue” à la “vue exposée” pour isoler les écarts,
-            corriger, puis vérifier en continu.
+            Nous modélisons l’empreinte exposée (“ce que l’on voit depuis l’extérieur”), puis nous comparons
+            à la vue attendue pour isoler les écarts et corriger.
           </p>
         </div>
 
         <div class="grid">
           <div class="card reveal">
             <h3>1) Découverte</h3>
-            <p>Inventorier l’exposition : ce qui existe, ce qui est accessible, ce qui change.</p>
+            <p>Recenser les actifs exposés et les points d’entrée associés.</p>
           </div>
           <div class="card reveal">
-            <h3>2) Analyse</h3>
-            <p>Identifier les écarts (actifs oubliés, configuration risquée, services non nécessaires).</p>
+            <h3>2) Modélisation</h3>
+            <p>Construire la “vue attendue” : ce qui devrait être exposé (et comment).</p>
           </div>
           <div class="card reveal">
-            <h3>3) Réduction</h3>
-            <p>Prioriser et corriger : fermer, durcir, segmenter, contrôler les accès.</p>
+            <h3>3) Comparaison</h3>
+            <p>Identifier les écarts : services inutiles, configs risquées, actifs oubliés.</p>
           </div>
           <div class="card reveal">
-            <h3>4) Maintien</h3>
-            <p>Surveiller pour éviter les retours en arrière et les nouveaux angles morts.</p>
+            <h3>4) Réduction & maintien</h3>
+            <p>Corriger, vérifier, puis surveiller en continu pour éviter les nouveaux angles morts.</p>
           </div>
         </div>
       </div>
@@ -522,12 +554,12 @@
     <!-- BÉNÉFICES -->
     <section class="panel" id="benefices">
       <div class="panel-inner">
-        <div class="parallax" data-parallax="0.14">
+        <div>
           <span class="kicker reveal">Bénéfices</span>
           <h2 class="title reveal">Clarté, priorisation, prévention</h2>
           <p class="lead reveal">
-            Beaucoup d’incidents partent de l’inconnu : actifs oubliés, exposition involontaire,
-            mauvaises configurations. Notre approche vise à les rendre visibles et corrigeables.
+            Beaucoup d’incidents viennent d’actifs oubliés ou mal configurés. En rendant l’exposition visible,
+            on réduit les angles morts et on accélère la remédiation.
           </p>
         </div>
 
@@ -538,15 +570,15 @@
           </div>
           <div class="card reveal">
             <h3>Priorisation claire</h3>
-            <p>Nous guidons vers les actions à impact, pas seulement un “scan”.</p>
+            <p>On guide vers les actions à impact, pas seulement un “scan”.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Détection plus tôt</h3>
+            <p>La déception (leurres/honeytokens) aide à repérer plus vite certains comportements suspects.</p>
           </div>
           <div class="card reveal">
             <h3>Prévention continue</h3>
-            <p>Nous détectons les changements avant exploitation.</p>
-          </div>
-          <div class="card reveal">
-            <h3>Pédagogie</h3>
-            <p>Comprendre → décider plus vite → corriger plus facilement.</p>
+            <p>On détecte les changements avant exploitation.</p>
           </div>
         </div>
       </div>
@@ -555,7 +587,7 @@
     <!-- À PROPOS -->
     <section class="panel" id="apropos">
       <div class="panel-inner">
-        <div class="parallax" data-parallax="0.12">
+        <div>
           <span class="kicker reveal">À propos</span>
           <h2 class="title reveal">Une approche orientée résultat</h2>
           <p class="lead reveal">
@@ -577,7 +609,7 @@
     <!-- CONTACT -->
     <section class="panel" id="contact">
       <div class="panel-inner">
-        <div class="parallax" data-parallax="0.12">
+        <div>
           <span class="kicker reveal">Contact</span>
           <h2 class="title reveal">Demander une démo</h2>
           <p class="lead reveal">Laissez-nous un message et nous vous recontactons rapidement.</p>
@@ -603,7 +635,7 @@
 
             <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
               <button class="btn primary" type="submit">Envoyer</button>
-              <span id="status" class="status ok">Message envoyé. Nous vous répondrons dès que possible.</span>
+              <span id="status" class="status">Message envoyé. Nous vous répondrons dès que possible.</span>
             </div>
           </form>
         </div>
@@ -619,38 +651,23 @@
     // Année
     document.getElementById("y").textContent = new Date().getFullYear();
 
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     // NAV apparaît après un peu de scroll
     const nav = document.getElementById("topnav");
-    const showNavAfter = 180;
-    const navTick = () => nav.classList.toggle("show", window.scrollY > showNavAfter);
+    const navTick = () => nav.classList.toggle("show", window.scrollY > 180);
     window.addEventListener("scroll", navTick, { passive:true });
     navTick();
 
-    // Reveal au scroll
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Reveal sections
     if (!prefersReduced) {
       const io = new IntersectionObserver((entries) => {
         for (const e of entries) if (e.isIntersecting) e.target.classList.add("visible");
       }, { threshold: 0.14 });
-
       document.querySelectorAll(".reveal").forEach(el => io.observe(el));
     } else {
       document.querySelectorAll(".reveal").forEach(el => el.classList.add("visible"));
     }
-
-    // Parallax très subtil (premium)
-    const parallaxEls = [...document.querySelectorAll("[data-parallax]")];
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const parallaxTick = () => {
-      const y = window.scrollY || 0;
-      for (const el of parallaxEls) {
-        const speed = parseFloat(el.getAttribute("data-parallax")) || 0.12;
-        const offset = clamp(-y * speed * 0.03, -22, 22);
-        el.style.setProperty("--py", offset.toFixed(2) + "px");
-      }
-    };
-    window.addEventListener("scroll", () => requestAnimationFrame(parallaxTick), { passive:true });
-    parallaxTick();
 
     // Form: confirmation “comme un vrai” (sans backend)
     const form = document.getElementById("contactForm");
@@ -661,6 +678,53 @@
       form.reset();
       setTimeout(() => status.classList.remove("show"), 4500);
     });
+
+    // ===== Zoom intro au scroll =====
+    const intro = document.querySelector(".intro");
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+    const updateIntro = () => {
+      if (prefersReduced) {
+        document.documentElement.style.setProperty("--introScale", "1");
+        document.documentElement.style.setProperty("--introBlur", "0px");
+        document.documentElement.style.setProperty("--introFade", "1");
+        document.documentElement.style.setProperty("--introTint", "0.35");
+        return;
+      }
+
+      const rect = intro.getBoundingClientRect();
+      // Progression: 0 quand on est en haut de l'intro, 1 quand on arrive en bas de l'intro (sur 100vh)
+      const progress = clamp((-rect.top) / (window.innerHeight), 0, 1);
+
+      // Scale de 2.2 -> 1.0
+      const scale = 2.2 - (1.2 * progress);
+      // Blur de 10px -> 0px
+      const blur = 10 - (10 * progress);
+
+      // Le texte apparaît surtout sur la fin du zoom (effet plus “ciné”)
+      const fade = clamp((progress - 0.35) / 0.65, 0, 1);
+
+      // Voile sombre diminue
+      const tint = 0.55 - (0.25 * progress);
+
+      document.documentElement.style.setProperty("--introScale", scale.toFixed(3));
+      document.documentElement.style.setProperty("--introBlur", blur.toFixed(2) + "px");
+      document.documentElement.style.setProperty("--introFade", fade.toFixed(3));
+      document.documentElement.style.setProperty("--introTint", tint.toFixed(3));
+    };
+
+    let raf = null;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        updateIntro();
+        raf = null;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive:true });
+    window.addEventListener("resize", updateIntro);
+    updateIntro();
   </script>
 </body>
 </html>

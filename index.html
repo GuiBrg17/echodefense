@@ -163,9 +163,7 @@
       position:absolute;
       inset:0;
       z-index:0;
-
       background: radial-gradient(900px 650px at 50% 45%, rgba(0,0,0,.15), rgba(0,0,0,.75));
-
       transform: scale(var(--globeScale)) translateY(var(--globeY));
       will-change: transform;
     }
@@ -177,6 +175,7 @@
       inset:0;
       background: url("Globe.png") center/420px no-repeat;
       transform-origin: 50% 50%;
+      will-change: transform, opacity; /* ✅ perf */
       animation: globeRotate 70s linear infinite, globeBreath 7.5s ease-in-out infinite;
     }
 
@@ -189,7 +188,7 @@
       50%      { opacity: 1; }
     }
     @media (prefers-reduced-motion: reduce){
-      .globe::after{ animation: none; }
+      .globe::after{ animation: none !important; } /* ✅ accessibilité */
     }
 
     .intro-inner{
@@ -207,29 +206,28 @@
       will-change: opacity, transform;
     }
 
+    /* ✅ Logo premium (fond blanc neutralisé) */
     .logo-big{
-  width:min(320px, 70vw);
-  height:auto;
-  border-radius: 26px;
-  padding: 20px;
+      width:min(320px, 70vw);
+      height:auto;
+      border-radius: 26px;
+      padding: 20px;
 
-  /* 🔥 Fond verre sombre pour neutraliser le blanc */
-  background: rgba(12,16,32,.55);
-  backdrop-filter: blur(16px) saturate(120%);
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
+      background: rgba(12,16,32,.55);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
 
-  border: 1px solid rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
 
-  box-shadow:
-    0 35px 90px rgba(0,0,0,.65),
-    inset 0 0 0 1px rgba(255,255,255,.04);
+      box-shadow:
+        0 35px 90px rgba(0,0,0,.65),
+        inset 0 0 0 1px rgba(255,255,255,.04);
 
-  display:block;
-  margin: 0 auto;
+      display:block;
+      margin: 0 auto;
 
-  /* Atténuation du fond blanc du logo */
-  filter: brightness(0.96) contrast(1.05);
-}
+      filter: brightness(0.96) contrast(1.05);
+    }
 
     /* Texte/boutons apparaissent ensuite */
     .brand{
@@ -492,7 +490,7 @@
     </div>
   </header>
 
-  <!-- INTRO (Globe -> Zoom -> Reveal -> Snap) -->
+  <!-- INTRO -->
   <section class="intro" id="home">
     <div class="intro-sticky">
       <div class="globe" aria-hidden="true"></div>
@@ -747,7 +745,7 @@
       const progress = clamp((-rect.top) / window.innerHeight, 0, 1);
 
       // Globe zoom IN
-      const globeScale = 1 + (1.9 * progress);    // ajuste si besoin: 1.6 (doux) → 2.2 (wow)
+      const globeScale = 1 + (1.9 * progress);
       const globeY = (progress * -18).toFixed(2) + "px";
 
       // Voile sombre diminue

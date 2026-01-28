@@ -8,6 +8,7 @@
 
   <style>
     :root{
+      --bg:#070a12;
       --border: rgba(255,255,255,.10);
       --text: rgba(244,247,255,.95);
       --muted: rgba(244,247,255,.62);
@@ -16,26 +17,49 @@
       --radius: 22px;
       --shadow: 0 40px 120px rgba(0,0,0,.55);
 
-      /* Intro globe */
+      /* ===== Intro Globe (piloté par JS) ===== */
       --introTint: 0.65;
       --globeScale: 1;
       --globeY: 0px;
 
-      --reveal: 0;
-      --logoReveal: 0;
-      --logoScale: 0.96;
+      /* Apparition progressive du contenu */
+      --reveal: 0;       /* texte + boutons */
+      --logoReveal: 0;   /* logo EchoDefense */
+      --logoScale: 0.96; /* micro effet */
     }
 
     *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color: var(--text);
-      background: #070a12;
+      background:
+        radial-gradient(900px 650px at 15% 12%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(900px 650px at 85% 18%, rgba(255,255,255,.035), transparent 60%),
+        linear-gradient(180deg, #060914 0%, #070a12 60%, #060914 100%);
       overflow-x:hidden;
     }
+    a{color:inherit; text-decoration:none}
+    p{margin:0; color:var(--muted); line-height:1.75}
 
-    /* NAV */
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none!important; transition:none!important; scroll-behavior:auto!important}
+    }
+
+    /* Grain subtil */
+    .grain{
+      position:fixed;
+      inset:0;
+      z-index:-2;
+      pointer-events:none;
+      opacity:.07;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    /* NAV flottante */
     header{
       position:fixed;
       top:14px;
@@ -45,157 +69,728 @@
       z-index:50;
       opacity:0;
       pointer-events:none;
-      transition:.3s;
+      transition: opacity .35s ease;
     }
-    header.show{opacity:1;pointer-events:auto}
-    .nav{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:10px 14px;
-      border-radius:999px;
-      background:rgba(11,15,27,.55);
-      backdrop-filter:blur(12px);
-      border:1px solid var(--border);
+    header.show{
+      opacity:1;
+      pointer-events:auto;
     }
-    .nav-left{display:flex;gap:10px;align-items:center;font-weight:800}
-    .nav-logo{width:28px;height:28px;border-radius:50%;padding:6px;background:rgba(255,255,255,.05)}
-    .nav-links a{margin-left:8px;font-size:13px;color:var(--muted)}
 
-    /* INTRO */
-    .intro{height:240vh;position:relative}
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background: rgba(11,15,27,.55);
+      backdrop-filter: blur(12px);
+      border-radius: 999px;
+      box-shadow: 0 22px 80px rgba(0,0,0,.35);
+    }
+
+    .nav-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+
+    .nav-logo{
+      width:30px;
+      height:30px;
+      border-radius:999px;
+      padding:6px;
+      object-fit:contain;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.05);
+    }
+
+    .nav-links{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .nav-links a{
+      font-size:13px;
+      font-weight:750;
+      color: rgba(244,247,255,.68);
+      padding:8px 10px;
+      border-radius:999px;
+      transition: background .2s ease, color .2s ease, transform .2s ease;
+    }
+    .nav-links a:hover{
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    /* =========================
+       INTRO GLOBE (zoom + reveal)
+    ========================= */
+    .intro{
+      height: 240vh;
+      position:relative;
+    }
+
     .intro-sticky{
-      position:sticky;top:0;height:100vh;
-      display:grid;place-items:center;
+      position:sticky;
+      top:0;
+      height:100vh;
+      display:grid;
+      place-items:center;
+      padding: 80px 20px 34px;
       overflow:hidden;
     }
+
+    /* Voile sombre (piloté par JS) */
     .intro-sticky::before{
-      content:"";position:absolute;inset:0;
-      background:rgba(0,0,0,var(--introTint));
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background: rgba(0,0,0,var(--introTint));
       z-index:1;
+      pointer-events:none;
     }
 
-    /* GLOBE */
+    /* Globe = couche 0 (zoom au scroll) */
     .globe{
-      position:absolute;inset:0;z-index:0;
+      position:absolute;
+      inset:0;
+      z-index:0;
+
       background: radial-gradient(900px 650px at 50% 45%, rgba(0,0,0,.15), rgba(0,0,0,.75));
+
       transform: scale(var(--globeScale)) translateY(var(--globeY));
+      will-change: transform;
     }
+
+    /* Calque globe vivant (rotation + respiration) */
     .globe::after{
-      content:"";position:absolute;inset:0;
-      background:url("Globe.png") center/420px no-repeat;
-      animation: globeRotate 70s linear infinite, globeBreath 7s ease-in-out infinite;
+      content:"";
+      position:absolute;
+      inset:0;
+      background: url("Globe.png") center/420px no-repeat;
+      transform-origin: 50% 50%;
+      animation: globeRotate 70s linear infinite, globeBreath 7.5s ease-in-out infinite;
     }
-    @keyframes globeRotate{to{transform:rotate(360deg)}}
-    @keyframes globeBreath{50%{opacity:1}}
 
-    .intro-inner{z-index:2;text-align:center}
+    @keyframes globeRotate{
+      from{ transform: rotate(0deg); }
+      to  { transform: rotate(360deg); }
+    }
+    @keyframes globeBreath{
+      0%, 100% { opacity: .92; }
+      50%      { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .globe::after{ animation: none; }
+    }
 
-    /* LOGO — FOND BLANC NEUTRALISÉ */
+    .intro-inner{
+      width:min(var(--max), 100%);
+      text-align:center;
+      position:relative;
+      z-index:2;
+    }
+
+    /* Logo EchoDefense : apparaît avant le texte */
     .zoom-wrap{
-      opacity:var(--logoReveal);
-      transform:scale(var(--logoScale));
-      transition:.2s;
-    }
-    .logo-big{
-      width:300px;max-width:70vw;
-      padding:20px;border-radius:26px;
-      background: rgba(12,16,32,.55);
-      backdrop-filter: blur(16px) saturate(120%);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:
-        0 35px 90px rgba(0,0,0,.65),
-        inset 0 0 0 1px rgba(255,255,255,.04);
-      filter: brightness(0.96) contrast(1.05);
+      display:inline-block;
+      opacity: var(--logoReveal);
+      transform: scale(var(--logoScale));
+      will-change: opacity, transform;
     }
 
+    .logo-big{
+  width:min(320px, 70vw);
+  height:auto;
+  border-radius: 26px;
+  padding: 20px;
+
+  /* 🔥 Fond verre sombre pour neutraliser le blanc */
+  background: rgba(12,16,32,.55);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+
+  border: 1px solid rgba(255,255,255,.10);
+
+  box-shadow:
+    0 35px 90px rgba(0,0,0,.65),
+    inset 0 0 0 1px rgba(255,255,255,.04);
+
+  display:block;
+  margin: 0 auto;
+
+  /* Atténuation du fond blanc du logo */
+  filter: brightness(0.96) contrast(1.05);
+}
+
+    /* Texte/boutons apparaissent ensuite */
     .brand{
-      font-size:clamp(36px,6vw,64px);
-      font-weight:900;margin-top:20px;
-      opacity:var(--reveal);
-      transform:translateY(calc((1 - var(--reveal))*14px));
+      margin-top:18px;
+      font-weight:950;
+      letter-spacing:-.6px;
+      font-size: clamp(38px, 7vw, 64px);
+      opacity: var(--reveal);
+      transform: translateY(calc((1 - var(--reveal)) * 14px));
+      transition: opacity .05s linear, transform .05s linear;
     }
-    .tagline,.hero-copy,.hero-actions{
-      opacity:var(--reveal);
-      transform:translateY(calc((1 - var(--reveal))*14px));
+
+    .tagline{
+      margin:10px auto 0;
+      max-width: 760px;
+      font-weight:850;
+      font-size: clamp(15px, 2.1vw, 18px);
+      color: rgba(244,247,255,.84);
+      opacity: var(--reveal);
+      transform: translateY(calc((1 - var(--reveal)) * 14px));
+      transition: opacity .05s linear, transform .05s linear;
+    }
+
+    .hero-copy{
+      margin:14px auto 0;
+      max-width: 920px;
+      font-size: clamp(15px, 2vw, 17px);
+      opacity: var(--reveal);
+      transform: translateY(calc((1 - var(--reveal)) * 14px));
+      transition: opacity .05s linear, transform .05s linear;
+    }
+
+    .hero-actions{
+      margin-top:26px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+      opacity: var(--reveal);
+      transform: translateY(calc((1 - var(--reveal)) * 14px));
+      transition: opacity .05s linear, transform .05s linear;
     }
 
     .btn{
-      padding:12px 18px;border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-weight:900;
+      font-size:14px;
       border:1px solid var(--border);
-      background:rgba(255,255,255,.06);
-      color:#fff;font-weight:700;
+      background: rgba(255,255,255,.04);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      cursor:pointer;
     }
-    .btn.primary{background:#fff;color:#000}
+    .btn.primary{
+      background: rgba(244,247,255,.92);
+      color:#070a12;
+      border:none;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 24px 70px rgba(0,0,0,.35);
+      filter: brightness(1.02);
+    }
+    .btn:active{ transform: translateY(0) scale(.98) }
 
-    /* SECTIONS */
-    main{max-width:var(--max);margin:auto}
-    .panel{min-height:100vh;padding:100px 20px;border-top:1px solid rgba(255,255,255,.06)}
+    .scroll-hint{
+      position:absolute;
+      bottom: 18px;
+      left:50%;
+      transform: translateX(-50%);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color: rgba(244,247,255,.55);
+      opacity: 1;
+      transition: opacity .2s ease;
+      user-select:none;
+      z-index:2;
+      pointer-events:none;
+    }
+    .mouse{
+      width:22px;height:34px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
+      position:relative;background: rgba(255,255,255,.03);
+    }
+    .mouse::after{
+      content:"";
+      width:4px;height:6px;border-radius:99px;
+      background: rgba(244,247,255,.88);
+      position:absolute; left:50%; top:7px;
+      transform: translateX(-50%);
+      animation: wheel 1.25s ease infinite;
+    }
+    @keyframes wheel{
+      0%{opacity:.2; transform:translateX(-50%) translateY(0)}
+      40%{opacity:1}
+      100%{opacity:.2; transform:translateX(-50%) translateY(10px)}
+    }
 
+    /* =========================
+       SECTIONS VERTICALES
+    ========================= */
+    main{
+      width:min(var(--max), calc(100% - 40px));
+      margin:0 auto;
+      padding: 0 0 80px;
+    }
+
+    .panel{
+      min-height:100vh;
+      display:grid;
+      align-items:center;
+      padding: 96px 0;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .panel-inner{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .panel-inner{ grid-template-columns: 1fr; }
+    }
+
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color: rgba(244,247,255,.58);
+      border:1px solid rgba(255,255,255,.12);
+      padding: 8px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .title{
+      margin:14px 0 10px;
+      font-size: clamp(26px, 3.4vw, 40px);
+      letter-spacing:-.4px;
+      line-height:1.08;
+    }
+
+    .lead{
+      font-size:16px;
+      max-width: 72ch;
+    }
+
+    .card{
+      border:1px solid var(--border);
+      background: rgba(11,15,27,.55);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 26px 90px rgba(0,0,0,.30);
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+    .card:hover{
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,.18);
+      box-shadow: 0 40px 120px rgba(0,0,0,.42);
+    }
+    .card h3{ margin:0 0 8px; font-size:16px }
+    .card p{ font-size:14px }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:14px;
+      margin-top:18px;
+    }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+
+    .list{ margin-top:12px; display:grid; gap:10px }
+    .li{ display:flex; gap:10px; font-size:14px; color: var(--muted) }
+    .dot{
+      width:8px;height:8px;border-radius:99px; margin-top:7px; flex:0 0 auto;
+      background: rgba(244,247,255,.88);
+      opacity:.85;
+    }
+
+    /* Reveal progressif sections */
+    .reveal{
+      opacity:0;
+      transform: translateY(18px);
+      filter: blur(2px);
+      transition: opacity .85s ease, transform .85s ease, filter .85s ease;
+      will-change: opacity, transform, filter;
+    }
+    .reveal.visible{
+      opacity:1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    /* Contact */
+    label{
+      display:block;
+      margin:10px 0 6px;
+      font-size:13px;
+      color: rgba(244,247,255,.58);
+      font-weight:750;
+    }
+    input, textarea{
+      width:100%;
+      padding:12px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{ min-height:130px; resize:vertical }
+
+    .status{
+      margin-top:12px;
+      font-size:12px;
+      color: rgba(244,247,255,.55);
+      display:none;
+    }
+    .status.show{ display:block; }
+
+    footer{
+      width:min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+      padding: 26px 0 54px;
+      text-align:center;
+      color: rgba(244,247,255,.50);
+      font-size:12px;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
   </style>
 </head>
 
 <body>
+  <div class="grain" aria-hidden="true"></div>
 
-<header id="topnav">
-  <div class="nav">
-    <div class="nav-left">
-      <img src="logo-echodefense.png" class="nav-logo">
-      EchoDefense
-    </div>
-    <div class="nav-links">
-      <a href="#services">Services</a>
-      <a href="#contact">Contact</a>
-    </div>
-  </div>
-</header>
-
-<section class="intro">
-  <div class="intro-sticky">
-    <div class="globe"></div>
-
-    <div class="intro-inner">
-      <div class="zoom-wrap">
-        <img src="logo-echodefense.png" class="logo-big">
+  <!-- NAV flottante -->
+  <header id="topnav">
+    <div class="nav">
+      <div class="nav-left">
+        <img class="nav-logo" src="logo-echodefense.png" alt="" />
+        <span>EchoDefense</span>
       </div>
-      <div class="brand">EchoDefense</div>
-      <div class="tagline">Rendre visible pour mieux défendre.</div>
-      <p class="hero-copy">Nous aidons les entreprises à réduire leur surface d’attaque.</p>
-      <div class="hero-actions">
-        <a href="#services" class="btn primary">Découvrir</a>
+      <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#methode">Méthode</a>
+        <a href="#benefices">Bénéfices</a>
+        <a href="#apropos">À propos</a>
+        <a href="#contact">Contact</a>
       </div>
     </div>
-  </div>
-</section>
+  </header>
 
-<main>
-  <section class="panel" id="services">
-    <h2>Services</h2>
-    <p>Réduction de surface d’attaque, visibilité, prévention.</p>
+  <!-- INTRO (Globe -> Zoom -> Reveal -> Snap) -->
+  <section class="intro" id="home">
+    <div class="intro-sticky">
+      <div class="globe" aria-hidden="true"></div>
+
+      <div class="intro-inner">
+        <div class="zoom-wrap">
+          <img class="logo-big" src="logo-echodefense.png" alt="Logo EchoDefense" />
+        </div>
+
+        <div class="brand">EchoDefense</div>
+        <div class="tagline">Rendre visible pour mieux défendre.</div>
+        <p class="hero-copy">
+          Nous aidons les entreprises à rendre leur exposition numérique visible et actionnable,
+          afin de réduire la surface d’attaque et limiter les risques.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn primary" href="#services">Découvrir</a>
+          <a class="btn" href="#contact">Demander une démo</a>
+        </div>
+      </div>
+
+      <div class="scroll-hint" aria-hidden="true">
+        <div class="mouse"></div>
+        <div>Scroll pour découvrir</div>
+      </div>
+    </div>
   </section>
-</main>
 
-<script>
-  const intro=document.querySelector(".intro");
-  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  let snapped=false;
+  <main>
+    <!-- SERVICES -->
+    <section class="panel" id="services">
+      <div class="panel-inner">
+        <div>
+          <span class="kicker reveal">Services</span>
+          <h2 class="title reveal">Une offre lisible, orientée prévention</h2>
+          <p class="lead reveal">
+            EchoDefense se concentre sur la réduction de surface d’attaque : inventorier l’exposition,
+            détecter les écarts, prioriser les actions et accompagner la correction.
+          </p>
 
-  const update=()=>{
-    const p=clamp((-intro.getBoundingClientRect().top)/innerHeight,0,1);
-    document.documentElement.style.setProperty("--globeScale",1+1.9*p);
-    document.documentElement.style.setProperty("--globeY",(-18*p)+"px");
-    document.documentElement.style.setProperty("--introTint",0.65-0.35*p);
-    document.documentElement.style.setProperty("--logoReveal",clamp((p-0.18)/0.25,0,1));
-    document.documentElement.style.setProperty("--logoScale",0.96+0.04*p);
-    document.documentElement.style.setProperty("--reveal",clamp((p-0.35)/0.45,0,1));
+          <div class="grid">
+            <div class="card reveal">
+              <h3>Scan d’empreinte</h3>
+              <p>Cartographie initiale des actifs exposés (domaines, services, points d’entrée).</p>
+            </div>
+            <div class="card reveal">
+              <h3>Surveillance</h3>
+              <p>Détection continue des changements, actifs nouveaux, expositions inattendues.</p>
+            </div>
+            <div class="card reveal">
+              <h3>Plan d’action</h3>
+              <p>Priorisation par risque + quick wins + suivi des corrections.</p>
+            </div>
+            <div class="card reveal">
+              <h3>Déception (leurres contrôlés)</h3>
+              <p>Leurres, honeytokens, honeypots : détection plus tôt et investigation en environnement maîtrisé.</p>
+            </div>
+          </div>
+        </div>
 
-    if(!snapped && p>0.98){
-      snapped=true;
-      document.querySelector("#services").scrollIntoView({behavior:"smooth"});
+        <div class="card reveal">
+          <h3>Ce que nous cartographions</h3>
+          <p>Une vue proche de ce qu’un attaquant observe depuis Internet.</p>
+          <div class="list">
+            <div class="li"><span class="dot"></span><span>Domaines, sous-domaines, certificats</span></div>
+            <div class="li"><span class="dot"></span><span>IP, ports et services exposés</span></div>
+            <div class="li"><span class="dot"></span><span>Technologies & configurations visibles</span></div>
+            <div class="li"><span class="dot"></span><span>Actifs oubliés (shadow IT)</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÉTHODE -->
+    <section class="panel" id="methode">
+      <div class="panel-inner">
+        <div class="card reveal">
+          <span class="kicker">Méthode</span>
+          <h2 class="title">Du jumeau numérique à la réduction du risque</h2>
+          <p class="lead">
+            Nous modélisons l’empreinte exposée (“ce que l’on voit depuis l’extérieur”), puis nous comparons
+            à la vue attendue pour isoler les écarts et corriger.
+          </p>
+        </div>
+
+        <div class="grid">
+          <div class="card reveal">
+            <h3>1) Découverte</h3>
+            <p>Recenser les actifs exposés et les points d’entrée associés.</p>
+          </div>
+          <div class="card reveal">
+            <h3>2) Modélisation</h3>
+            <p>Construire la “vue attendue” : ce qui devrait être exposé (et comment).</p>
+          </div>
+          <div class="card reveal">
+            <h3>3) Comparaison</h3>
+            <p>Identifier les écarts : services inutiles, configs risquées, actifs oubliés.</p>
+          </div>
+          <div class="card reveal">
+            <h3>4) Réduction & maintien</h3>
+            <p>Corriger, vérifier, puis surveiller en continu pour éviter les nouveaux angles morts.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BÉNÉFICES -->
+    <section class="panel" id="benefices">
+      <div class="panel-inner">
+        <div>
+          <span class="kicker reveal">Bénéfices</span>
+          <h2 class="title reveal">Clarté, priorisation, prévention</h2>
+          <p class="lead reveal">
+            Beaucoup d’incidents viennent d’actifs oubliés ou mal configurés. En rendant l’exposition visible,
+            on réduit les angles morts et on accélère la remédiation.
+          </p>
+        </div>
+
+        <div class="grid">
+          <div class="card reveal">
+            <h3>Moins d’angles morts</h3>
+            <p>Ce qui est exposé est inventorié : on réduit l’inconnu.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Priorisation claire</h3>
+            <p>On guide vers les actions à impact, pas seulement un “scan”.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Détection plus tôt</h3>
+            <p>La déception (leurres/honeytokens) aide à repérer plus vite certains comportements suspects.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Prévention continue</h3>
+            <p>On détecte les changements avant exploitation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- À PROPOS -->
+    <section class="panel" id="apropos">
+      <div class="panel-inner">
+        <div>
+          <span class="kicker reveal">À propos</span>
+          <h2 class="title reveal">Une approche orientée résultat</h2>
+          <p class="lead reveal">
+            EchoDefense aide les organisations à réduire leur exposition et à maintenir une posture de sécurité
+            plus robuste dans la durée.
+          </p>
+        </div>
+
+        <div class="card reveal">
+          <h3>Positionnement</h3>
+          <p>
+            Prévention et réduction de surface d’attaque : rendre l’exposition visible, prioriser les risques,
+            accompagner la remédiation avec une approche claire et pédagogique.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="panel" id="contact">
+      <div class="panel-inner">
+        <div>
+          <span class="kicker reveal">Contact</span>
+          <h2 class="title reveal">Demander une démo</h2>
+          <p class="lead reveal">Laissez-nous un message et nous vous recontactons rapidement.</p>
+        </div>
+
+        <div class="card reveal">
+          <form id="contactForm">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+              <div>
+                <label>Nom</label>
+                <input name="name" placeholder="Votre nom" required />
+              </div>
+              <div>
+                <label>Email</label>
+                <input name="email" type="email" placeholder="vous@entreprise.fr" required />
+              </div>
+            </div>
+
+            <div>
+              <label>Message</label>
+              <textarea name="message" placeholder="Décrivez votre besoin" required></textarea>
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+              <button class="btn primary" type="submit">Envoyer</button>
+              <span id="status" class="status">Message envoyé. Nous vous répondrons dès que possible.</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="y"></span> EchoDefense — Tous droits réservés
+  </footer>
+
+  <script>
+    // Année
+    document.getElementById("y").textContent = new Date().getFullYear();
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // NAV apparaît après un peu de scroll
+    const nav = document.getElementById("topnav");
+    const navTick = () => nav.classList.toggle("show", window.scrollY > 180);
+    window.addEventListener("scroll", navTick, { passive:true });
+    navTick();
+
+    // Reveal sections
+    if (!prefersReduced) {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) if (e.isIntersecting) e.target.classList.add("visible");
+      }, { threshold: 0.14 });
+      document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+    } else {
+      document.querySelectorAll(".reveal").forEach(el => el.classList.add("visible"));
     }
-    if(p<0.2)snapped=false;
-  };
-  window.addEventListener("scroll",()=>requestAnimationFrame(update));
-  update();
-</script>
 
+    // Form (sans backend)
+    const form = document.getElementById("contactForm");
+    const status = document.getElementById("status");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      status.classList.add("show");
+      form.reset();
+      setTimeout(() => status.classList.remove("show"), 4500);
+    });
+
+    // ===== Globe zoom + reveal + snap =====
+    const intro = document.querySelector(".intro");
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    let snapped = false;
+
+    const updateIntro = () => {
+      if (prefersReduced) {
+        document.documentElement.style.setProperty("--introTint", "0.35");
+        document.documentElement.style.setProperty("--globeScale", "1");
+        document.documentElement.style.setProperty("--globeY", "0px");
+        document.documentElement.style.setProperty("--reveal", "1");
+        document.documentElement.style.setProperty("--logoReveal", "1");
+        document.documentElement.style.setProperty("--logoScale", "1");
+        return;
+      }
+
+      const rect = intro.getBoundingClientRect();
+      const progress = clamp((-rect.top) / window.innerHeight, 0, 1);
+
+      // Globe zoom IN
+      const globeScale = 1 + (1.9 * progress);    // ajuste si besoin: 1.6 (doux) → 2.2 (wow)
+      const globeY = (progress * -18).toFixed(2) + "px";
+
+      // Voile sombre diminue
+      const tint = 0.65 - (0.35 * progress);
+
+      // Apparition en étapes
+      const logoReveal = clamp((progress - 0.18) / 0.25, 0, 1);
+      const reveal = clamp((progress - 0.35) / 0.45, 0, 1);
+      const logoScale = 0.96 + (0.04 * logoReveal);
+
+      document.documentElement.style.setProperty("--globeScale", globeScale.toFixed(3));
+      document.documentElement.style.setProperty("--globeY", globeY);
+      document.documentElement.style.setProperty("--introTint", tint.toFixed(3));
+      document.documentElement.style.setProperty("--logoReveal", logoReveal.toFixed(3));
+      document.documentElement.style.setProperty("--logoScale", logoScale.toFixed(3));
+      document.documentElement.style.setProperty("--reveal", reveal.toFixed(3));
+
+      // Cache le hint quand le contenu est bien visible
+      const hint = document.querySelector(".scroll-hint");
+      if (hint) hint.style.opacity = (progress < 0.20) ? "1" : "0";
+
+      // Snap automatique
+      if (!snapped && progress > 0.985) {
+        snapped = true;
+        const target = document.querySelector("#services");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      if (progress < 0.20) snapped = false;
+    };
+
+    let raf = null;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        updateIntro();
+        raf = null;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive:true });
+    window.addEventListener("resize", updateIntro);
+    updateIntro();
+  </script>
 </body>
 </html>

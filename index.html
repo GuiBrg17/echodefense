@@ -8,409 +8,453 @@
 
   <style>
     :root{
-      --bg:#070b16;
-      --panel:#0c1226;
-      --card:rgba(16,26,51,.55);
-      --text:#eaf0ff;
-      --muted:#a9b4d0;
+      --bg:#050814;
+      --panel:#080c1f;
+      --text:#eef3ff;
+      --muted:rgba(238,243,255,.68);
+      --border:rgba(255,255,255,.12);
       --accent:#3bc7ff;
       --accent2:#7cffc6;
-      --border:rgba(255,255,255,.10);
-      --shadow: 0 26px 80px rgba(0,0,0,.45);
+
+      --max: 1120px;
+      --radius: 22px;
+      --shadow: 0 40px 120px rgba(0,0,0,.55);
     }
 
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
+    *{ box-sizing:border-box }
+    html{ scroll-behavior:smooth }
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 800px at 20% 10%, rgba(59,199,255,.16), transparent 55%),
-        radial-gradient(900px 700px at 85% 25%, rgba(124,255,198,.10), transparent 55%),
-        var(--bg);
+      color: var(--text);
+      background: var(--bg);
       overflow-x:hidden;
     }
-    a{color:inherit;text-decoration:none}
+    a{ color:inherit; text-decoration:none }
+    p{ margin:0; color: var(--muted); line-height:1.7 }
 
-    /* Accessibilité : si réduction des animations */
+    /* Respect des préférences d’animation */
     @media (prefers-reduced-motion: reduce){
-      *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+      *{ animation:none!important; transition:none!important; scroll-behavior:auto!important }
     }
 
-    /* =========================
-       INTRO FULLSCREEN
-    ========================= */
-    .intro{
+    /* ====== BACKDROP / GLOW (effet Rockstar-like mais original) ====== */
+    .backdrop{
+      position:fixed;
+      inset:-20vh -20vw;
+      z-index:-2;
+      background:
+        radial-gradient(900px 650px at 20% 10%, rgba(59,199,255,.20), transparent 60%),
+        radial-gradient(900px 650px at 82% 18%, rgba(124,255,198,.14), transparent 60%),
+        radial-gradient(1000px 800px at 50% 110%, rgba(155,120,255,.10), transparent 60%),
+        linear-gradient(180deg, #040717 0%, #050814 30%, #040717 100%);
+      transform: translate3d(0,0,0);
+    }
+
+    /* Film grain léger (option “cinéma”) */
+    .grain{
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      pointer-events:none;
+      opacity:.08;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    /* ====== NAV MINIMAL (apparaît après un peu de scroll) ====== */
+    header{
+      position:fixed;
+      top:14px;
+      left:50%;
+      transform: translateX(-50%);
+      width:min(var(--max), calc(100% - 28px));
+      z-index:50;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .35s ease;
+    }
+    header.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background: rgba(8,12,31,.55);
+      backdrop-filter: blur(10px);
+      border-radius: 999px;
+      box-shadow: 0 20px 70px rgba(0,0,0,.35);
+    }
+    .nav-left{
+      display:flex; align-items:center; gap:10px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .nav-logo{
+      width:30px;height:30px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      padding:6px;
+      object-fit:contain;
+    }
+    .nav-links{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .nav-links a{
+      font-size:13px;
+      font-weight:700;
+      color: rgba(238,243,255,.72);
+      padding:8px 10px;
+      border-radius:999px;
+      transition: background .2s ease, color .2s ease, transform .2s ease;
+    }
+    .nav-links a:hover{
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    /* ====== INTRO HERO 100vh ====== */
+    .hero{
       min-height:100vh;
       display:grid;
       place-items:center;
-      padding:54px 20px 34px;
+      padding: 80px 20px 34px;
       position:relative;
     }
-
-    .intro-inner{
-      width:min(980px, 100%);
+    .hero-inner{
+      width:min(var(--max), 100%);
       text-align:center;
     }
-
     .logo-big{
-      width:min(220px, 55vw);
+      width:min(260px, 60vw);
       height:auto;
-      border-radius:28px;
-      padding:18px;
-      background:rgba(255,255,255,.05);
+      border-radius: 28px;
+      padding: 18px;
       border:1px solid var(--border);
-      box-shadow: 0 28px 90px rgba(0,0,0,.55);
-      animation: popIn .9s ease both;
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow);
+      transform: translateY(8px) scale(.98);
+      opacity:0;
+      animation: heroIn .9s ease forwards;
     }
-
-    @keyframes popIn{
-      from{opacity:0; transform: translateY(14px) scale(.96)}
-      to{opacity:1; transform: translateY(0) scale(1)}
-    }
-
     .brand{
       margin-top:18px;
       font-weight:950;
-      font-size: clamp(34px, 6vw, 56px);
       letter-spacing:-.6px;
-      animation: fadeUp .9s ease .1s both;
+      font-size: clamp(38px, 7vw, 64px);
+      opacity:0;
+      transform: translateY(12px);
+      animation: heroIn .9s ease .08s forwards;
     }
-
     .tagline{
       margin:10px auto 0;
-      max-width:720px;
+      max-width: 760px;
       font-weight:900;
-      font-size: clamp(16px, 2.2vw, 18px);
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-      animation: fadeUp .9s ease .18s both;
+      font-size: clamp(16px, 2.2vw, 19px);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip:text; background-clip:text;
+      color: transparent;
+      opacity:0;
+      transform: translateY(12px);
+      animation: heroIn .9s ease .16s forwards;
     }
-
-    .sub{
+    .hero-copy{
       margin:14px auto 0;
-      max-width:820px;
-      color:var(--muted);
+      max-width: 920px;
       font-size: clamp(15px, 2vw, 17px);
-      line-height:1.7;
-      animation: fadeUp .9s ease .26s both;
+      opacity:0;
+      transform: translateY(12px);
+      animation: heroIn .9s ease .24s forwards;
     }
-
-    @keyframes fadeUp{
-      from{opacity:0; transform: translateY(10px)}
-      to{opacity:1; transform: translateY(0)}
-    }
-
-    .intro-actions{
+    .hero-actions{
       margin-top:26px;
       display:flex;
-      justify-content:center;
       gap:12px;
       flex-wrap:wrap;
-      animation: fadeUp .9s ease .34s both;
+      justify-content:center;
+      opacity:0;
+      transform: translateY(12px);
+      animation: heroIn .9s ease .32s forwards;
+    }
+    @keyframes heroIn{
+      to{ opacity:1; transform: translateY(0) scale(1) }
     }
 
     .btn{
-      padding:12px 16px;
-      border-radius:14px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-weight:900;
+      font-size:14px;
       border:1px solid var(--border);
-      background:rgba(16,26,51,.65);
-      font-weight:850;
-      cursor:pointer;
-      transition:.2s;
+      background: rgba(255,255,255,.05);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
     }
     .btn.primary{
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#071025;
       border:none;
+      color:#061026;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
     }
-    .btn:hover{transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,0,0,.28)}
-    .btn:active{transform: scale(.98)}
+    .btn:hover{ transform: translateY(-2px); box-shadow: 0 20px 60px rgba(0,0,0,.35); filter: brightness(1.03) }
+    .btn:active{ transform: translateY(0) scale(.98) }
 
     .scroll-hint{
       position:absolute;
-      bottom:18px;
+      bottom: 18px;
       left:50%;
-      transform:translateX(-50%);
+      transform: translateX(-50%);
       display:flex;
       flex-direction:column;
       align-items:center;
       gap:8px;
-      color:var(--muted);
       font-size:12px;
+      color: rgba(238,243,255,.65);
       opacity:.95;
+      user-select:none;
     }
     .mouse{
-      width:22px;height:34px;border-radius:999px;border:1px solid var(--border);
-      position:relative;
-      background:rgba(255,255,255,.03);
+      width:22px;height:34px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
+      position:relative;background: rgba(255,255,255,.04);
     }
     .mouse::after{
       content:"";
       width:4px;height:6px;border-radius:99px;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
       position:absolute; left:50%; top:7px;
-      transform:translateX(-50%);
+      transform: translateX(-50%);
       animation: wheel 1.25s ease infinite;
     }
     @keyframes wheel{
-      0%{opacity:.2; transform:translateX(-50%) translateY(0)}
-      40%{opacity:1}
-      100%{opacity:.2; transform:translateX(-50%) translateY(10px)}
+      0%{ opacity:.2; transform:translateX(-50%) translateY(0) }
+      40%{ opacity:1 }
+      100%{ opacity:.2; transform:translateX(-50%) translateY(10px) }
     }
 
-    /* =========================
-       NAV STICKY (après intro)
-    ========================= */
-    header{
-      position:sticky;
-      top:0;
-      z-index:10;
-      backdrop-filter: blur(10px);
-      background: rgba(7,11,22,.62);
-      border-bottom:1px solid var(--border);
+    /* ====== SECTIONS “cinéma” (100vh, verticales, longues) ====== */
+    main{
+      width:min(var(--max), calc(100% - 40px));
+      margin:0 auto;
+      padding: 0 0 80px;
     }
-    .nav{
-      max-width:1100px;
-      margin:auto;
-      padding:12px 20px;
-      display:flex;
-      justify-content:space-between;
+
+    .panel{
+      min-height:100vh;
+      display:grid;
       align-items:center;
-      gap:14px;
+      padding: 90px 0;
+      border-top: 1px solid rgba(255,255,255,.06);
     }
-    .brand-small{
-      display:flex; align-items:center; gap:10px; font-weight:900;
-      letter-spacing:.2px;
+    .panel-inner{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
+      align-items:start;
     }
-    .logo-small{
-      width:32px;height:32px;border-radius:12px;padding:6px;
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--border);
+    @media (max-width: 980px){
+      .panel-inner{ grid-template-columns: 1fr; }
     }
-    nav a{
-      color:var(--muted);
-      font-weight:650;
-      font-size:14px;
-      margin-left:14px;
-    }
-    nav a:hover{color:var(--text)}
-
-    /* =========================
-       SECTIONS VERTICALES
-    ========================= */
-    main{max-width:1100px; margin:auto; padding:0 20px}
-    .section{
-      padding:84px 0;
-      border-bottom:1px solid rgba(255,255,255,.06);
-    }
-    .section:last-child{border-bottom:none}
 
     .kicker{
-      display:inline-block;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
       font-size:12px;
       letter-spacing:.18em;
       text-transform:uppercase;
-      color:var(--muted);
-      border:1px solid rgba(255,255,255,.10);
-      padding:8px 10px;
+      color: rgba(238,243,255,.62);
+      border:1px solid rgba(255,255,255,.12);
+      padding: 8px 12px;
       border-radius:999px;
-      background:rgba(255,255,255,.03);
+      background: rgba(255,255,255,.04);
     }
-
-    h2{
+    .title{
       margin:14px 0 10px;
-      font-size: clamp(24px, 3vw, 34px);
-      letter-spacing:-.3px;
+      font-size: clamp(26px, 3.4vw, 40px);
+      letter-spacing:-.4px;
+      line-height:1.08;
+    }
+    .lead{
+      font-size:16px;
+      max-width: 70ch;
     }
 
-    .lead{
-      margin:0;
-      color:var(--muted);
-      font-size:16px;
-      line-height:1.75;
-      max-width:900px;
+    .card{
+      border:1px solid var(--border);
+      background: rgba(8,12,31,.55);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 26px 90px rgba(0,0,0,.35);
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
     }
+    .card:hover{
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,.20);
+      box-shadow: 0 40px 120px rgba(0,0,0,.48);
+    }
+    .card h3{ margin:0 0 8px; font-size:16px }
+    .card p{ font-size:14px }
 
     .grid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:18px;
-      margin-top:26px;
+      grid-template-columns: repeat(2, 1fr);
+      gap:14px;
+      margin-top:18px;
     }
-    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
-
-    .card{
-      padding:20px;
-      border-radius:18px;
-      border:1px solid var(--border);
-      background:var(--card);
-      box-shadow: 0 18px 60px rgba(0,0,0,.35);
-      transition:.25s;
-    }
-    .card:hover{transform: translateY(-4px); box-shadow: var(--shadow);}
-
-    .card h3{margin:0 0 8px; font-size:16px}
-    .card p{margin:0; color:var(--muted); line-height:1.7; font-size:14px}
-
-    .list{margin-top:12px; display:grid; gap:10px}
-    .li{display:flex; gap:10px; color:var(--muted); font-size:14px; line-height:1.6}
-    .dot{width:9px; height:9px; border-radius:99px; margin-top:7px;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      flex:0 0 auto;
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
     }
 
-    .split{
-      display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap:18px;
-      align-items:start;
-      margin-top:26px;
+    .list{ margin-top:12px; display:grid; gap:10px }
+    .li{ display:flex; gap:10px; font-size:14px; color: var(--muted) }
+    .dot{
+      width:9px;height:9px;border-radius:99px; margin-top:7px; flex:0 0 auto;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 10px 30px rgba(59,199,255,.18);
     }
-    @media(max-width:900px){ .split{grid-template-columns:1fr} }
 
-    /* =========================
-       REVEAL AU SCROLL
-    ========================= */
+    /* ====== Reveal au scroll (comme Rockstar: le contenu apparaît petit à petit) ====== */
     .reveal{
       opacity:0;
-      transform: translateY(14px);
+      transform: translateY(18px);
       filter: blur(2px);
-      transition: opacity .8s ease, transform .8s ease, filter .8s ease;
+      transition: opacity .85s ease, transform .85s ease, filter .85s ease;
       will-change: opacity, transform, filter;
     }
-    .reveal.is-visible{
+    .reveal.visible{
       opacity:1;
       transform: translateY(0);
       filter: blur(0);
     }
 
-    /* =========================
-       CONTACT
-    ========================= */
+    /* ====== Parallax léger sur certains blocs ====== */
+    .parallax{
+      transform: translateY(var(--py, 0px));
+      transition: transform .08s linear;
+      will-change: transform;
+    }
+
+    /* ====== Contact ====== */
     label{
       display:block;
       margin:10px 0 6px;
       font-size:13px;
-      color:var(--muted);
-      font-weight:650;
+      color: rgba(238,243,255,.65);
+      font-weight:700;
     }
     input, textarea{
       width:100%;
       padding:12px 12px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:rgba(7,11,22,.35);
-      color:var(--text);
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
       outline:none;
     }
-    textarea{min-height:120px; resize:vertical}
+    textarea{ min-height:130px; resize:vertical }
 
     footer{
-      padding:44px 0 54px;
-      color:var(--muted);
-      font-size:12px;
+      width:min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+      padding: 26px 0 54px;
       text-align:center;
+      color: rgba(238,243,255,.55);
+      font-size:12px;
+      border-top:1px solid rgba(255,255,255,.06);
     }
   </style>
 </head>
 
 <body>
+  <div class="backdrop" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
 
-  <!-- INTRO PLEIN ÉCRAN -->
-  <section class="intro" aria-label="Intro EchoDefense">
-    <div class="intro-inner">
+  <!-- NAV flottante -->
+  <header id="topnav">
+    <div class="nav">
+      <div class="nav-left">
+        <img class="nav-logo" src="logo-echodefense.png" alt="" />
+        <span>EchoDefense</span>
+      </div>
+      <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#methode">Méthode</a>
+        <a href="#benefices">Bénéfices</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-inner">
       <img class="logo-big" src="logo-echodefense.png" alt="Logo EchoDefense" />
       <div class="brand">EchoDefense</div>
       <div class="tagline">Rendre visible pour mieux défendre.</div>
-      <p class="sub">
-        Projet de service en cybersécurité : rendre l’exposition numérique des entreprises visible, mesurable
-        et actionnable, afin de réduire la surface d’attaque avant qu’elle ne soit exploitée.
+      <p class="hero-copy">
+        Maquette de service cybersécurité : création d’un “jumeau” de l’empreinte numérique visible,
+        pour détecter les actifs oubliés, les expositions et guider la réduction de surface d’attaque.
       </p>
-
-      <div class="intro-actions">
-        <a class="btn primary" href="#services">Découvrir le projet</a>
-        <a class="btn" href="#contact">Contact (fictif)</a>
+      <div class="hero-actions">
+        <a class="btn primary" href="#services">Scroll / Découvrir</a>
+        <a class="btn" href="#contact">Demande de démo (fictive)</a>
       </div>
     </div>
 
     <div class="scroll-hint" aria-hidden="true">
       <div class="mouse"></div>
-      <div>Scroll pour découvrir</div>
+      <div>Scroll for more</div>
     </div>
   </section>
 
-  <!-- NAV qui apparaît ensuite -->
-  <header>
-    <div class="nav">
-      <div class="brand-small">
-        <img class="logo-small" src="logo-echodefense.png" alt="" />
-        <span>EchoDefense</span>
-      </div>
-      <nav aria-label="Navigation">
-        <a href="#services">Services</a>
-        <a href="#methode">Méthode</a>
-        <a href="#benefices">Bénéfices</a>
-        <a href="#apropos">À propos</a>
-        <a href="#contact">Contact</a>
-      </nav>
-    </div>
-  </header>
-
   <main>
+    <!-- PANEL 1 -->
+    <section class="panel" id="services">
+      <div class="panel-inner">
+        <div class="parallax" data-parallax="0.18">
+          <span class="kicker reveal">Services</span>
+          <h2 class="title reveal">Une offre lisible, préventive, orientée action</h2>
+          <p class="lead reveal">
+            Objectif : rendre visible ce qui est exposé, détecter les écarts, prioriser les corrections,
+            et accompagner la remédiation.
+          </p>
 
-    <!-- SERVICES -->
-    <section id="services" class="section">
-      <span class="kicker reveal">Services</span>
-      <h2 class="reveal">Une offre simple, claire, orientée prévention</h2>
-      <p class="lead reveal">
-        EchoDefense se concentre sur la réduction de surface d’attaque : identifier ce qui est exposé,
-        détecter les écarts, prioriser les actions et accompagner la correction.
-      </p>
+          <div class="grid">
+            <div class="card reveal">
+              <h3>Scan d’empreinte</h3>
+              <p>Cartographie initiale des actifs exposés (domaines, services, points d’entrée).</p>
+            </div>
+            <div class="card reveal">
+              <h3>Surveillance</h3>
+              <p>Détection continue des changements, actifs nouveaux, expositions inattendues.</p>
+            </div>
+            <div class="card reveal">
+              <h3>Plan d’action</h3>
+              <p>Priorisation par risque + quick wins + suivi des corrections.</p>
+            </div>
+            <div class="card reveal">
+              <h3>Accompagnement</h3>
+              <p>Pédagogie + conseils d’hygiène (MFA, durcissement, accès, sauvegardes).</p>
+            </div>
+          </div>
+        </div>
 
-      <div class="grid">
         <div class="card reveal">
-          <h3>Scan d’empreinte</h3>
-          <p>Cartographie initiale de la surface d’attaque (actifs, services, exposition).</p>
-        </div>
-        <div class="card reveal">
-          <h3>Surveillance continue</h3>
-          <p>Détection des changements, nouveaux actifs, configurations risquées, actifs oubliés.</p>
-        </div>
-        <div class="card reveal">
-          <h3>Plan d’action</h3>
-          <p>Priorisation par risque + quick wins + suivi de remédiation (accompagnement).</p>
-        </div>
-        <div class="card reveal">
-          <h3>Hygiène & bonnes pratiques</h3>
-          <p>Recommandations simples (MFA, durcissement, gestion des accès, sauvegardes).</p>
-        </div>
-        <div class="card reveal">
-          <h3>Tableau de bord</h3>
-          <p>Une vue lisible : ce qui est exposé, ce qui a changé, quoi corriger en premier.</p>
-        </div>
-        <div class="card reveal">
-          <h3>Accompagnement</h3>
-          <p>Explications pédagogiques + suivi, pour passer du constat à l’action.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- METHODE -->
-    <section id="methode" class="section">
-      <span class="kicker reveal">Méthode</span>
-      <h2 class="reveal">Du jumeau numérique à la réduction du risque</h2>
-      <p class="lead reveal">
-        On modélise ce qu’un attaquant peut voir (empreinte publique) puis on compare à ce qui devrait exister
-        (vue attendue) pour corriger les écarts.
-      </p>
-
-      <div class="split">
-        <div class="card reveal">
-          <h3>Ce que l’on “duplique” (empreinte visible)</h3>
+          <h3>Ce que l’on “duplique”</h3>
+          <p>Une vue proche de ce qu’un attaquant observe depuis Internet.</p>
           <div class="list">
             <div class="li"><span class="dot"></span><span>Domaines, sous-domaines, certificats</span></div>
             <div class="li"><span class="dot"></span><span>IP, ports et services exposés</span></div>
@@ -418,116 +462,157 @@
             <div class="li"><span class="dot"></span><span>Actifs oubliés (shadow IT)</span></div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="card reveal">
-          <h3>Process en 3 étapes</h3>
-          <p><b>1)</b> Découverte des actifs</p>
-          <p><b>2)</b> Analyse & comparaison</p>
-          <p><b>3)</b> Réduction & maintien</p>
-          <p style="margin-top:10px;color:var(--muted)">
-            Objectif : rendre la sécurité plus simple, plus lisible, plus actionnable.
+    <!-- PANEL 2 -->
+    <section class="panel" id="methode">
+      <div class="panel-inner">
+        <div class="card reveal parallax" data-parallax="0.22">
+          <span class="kicker">Méthode</span>
+          <h2 class="title">Du constat à la réduction du risque</h2>
+          <p class="lead">
+            On compare la “vue attendue” à la “vue exposée” pour isoler les écarts,
+            corriger, puis vérifier en continu.
           </p>
         </div>
-      </div>
-    </section>
 
-    <!-- BENEFICES -->
-    <section id="benefices" class="section">
-      <span class="kicker reveal">Bénéfices</span>
-      <h2 class="reveal">Pourquoi ça aide vraiment une entreprise</h2>
-      <p class="lead reveal">
-        Beaucoup de risques viennent d’actifs oubliés, de mauvaises configurations ou de services exposés “par défaut”.
-        EchoDefense vise à rendre ces points visibles et corrigeables.
-      </p>
-
-      <div class="grid">
-        <div class="card reveal">
-          <h3>Moins d’inconnu = moins de risque</h3>
-          <p>On réduit les angles morts : ce qui est exposé est inventorié.</p>
-        </div>
-        <div class="card reveal">
-          <h3>Priorisation claire</h3>
-          <p>On ne “scanne pas pour scanner” : on guide vers les actions à impact.</p>
-        </div>
-        <div class="card reveal">
-          <h3>Prévention continue</h3>
-          <p>On détecte les changements avant qu’ils deviennent exploitables.</p>
-        </div>
-        <div class="card reveal">
-          <h3>Pédagogie</h3>
-          <p>On explique simplement : décisions plus rapides, corrections plus faciles.</p>
+        <div class="grid">
+          <div class="card reveal">
+            <h3>1) Découverte</h3>
+            <p>Inventorier l’exposition : ce qui existe, ce qui est accessible, ce qui change.</p>
+          </div>
+          <div class="card reveal">
+            <h3>2) Analyse</h3>
+            <p>Identifier les écarts (actifs oubliés, config risquée, services non nécessaires).</p>
+          </div>
+          <div class="card reveal">
+            <h3>3) Réduction</h3>
+            <p>Prioriser et corriger : fermer, durcir, segmenter, contrôler les accès.</p>
+          </div>
+          <div class="card reveal">
+            <h3>4) Maintien</h3>
+            <p>Surveillance pour éviter les retours en arrière et les nouveaux angles morts.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- A PROPOS -->
-    <section id="apropos" class="section">
-      <span class="kicker reveal">À propos</span>
-      <h2 class="reveal">Un projet fictif, une vision concrète</h2>
-      <p class="lead reveal">
-        EchoDefense est une maquette conçue pour un entretien de formation : elle montre une direction professionnelle
-        en cybersécurité, orientée prévention et réduction de surface d’attaque.
-      </p>
+    <!-- PANEL 3 -->
+    <section class="panel" id="benefices">
+      <div class="panel-inner">
+        <div class="parallax" data-parallax="0.18">
+          <span class="kicker reveal">Bénéfices</span>
+          <h2 class="title reveal">Pourquoi c’est utile (même pour une PME)</h2>
+          <p class="lead reveal">
+            Beaucoup d’incidents partent de l’inconnu : actifs oubliés, exposition involontaire,
+            mauvaises configs. EchoDefense vise à les rendre visibles et corrigeables.
+          </p>
+        </div>
+
+        <div class="grid">
+          <div class="card reveal">
+            <h3>Moins d’angles morts</h3>
+            <p>Ce qui est exposé est inventorié : on réduit l’inconnu.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Priorisation claire</h3>
+            <p>On guide vers les actions à impact, pas juste un “scan”.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Prévention continue</h3>
+            <p>On détecte les changements avant exploitation.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Pédagogie</h3>
+            <p>Comprendre → décider plus vite → corriger plus facilement.</p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- CONTACT -->
-    <section id="contact" class="section">
-      <span class="kicker reveal">Contact</span>
-      <h2 class="reveal">Demande de démo (fictive)</h2>
-      <p class="lead reveal">
-        Formulaire de démonstration : aucune donnée n’est envoyée. Idéal pour présenter le projet à l’oral.
-      </p>
+    <section class="panel" id="contact">
+      <div class="panel-inner">
+        <div class="parallax" data-parallax="0.16">
+          <span class="kicker reveal">Contact</span>
+          <h2 class="title reveal">Demande de démo (fictive)</h2>
+          <p class="lead reveal">Formulaire de démonstration (aucune donnée envoyée). Idéal pour ton entretien.</p>
+        </div>
 
-      <div class="card reveal" style="margin-top:22px">
-        <form onsubmit="event.preventDefault(); alert('Merci ! (Formulaire fictif pour démonstration)');">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
-            <div>
-              <label>Nom</label>
-              <input placeholder="Votre nom" />
+        <div class="card reveal">
+          <form onsubmit="event.preventDefault(); alert('Merci ! (Formulaire fictif pour démonstration)');">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+              <div>
+                <label>Nom</label>
+                <input placeholder="Votre nom" />
+              </div>
+              <div>
+                <label>Email</label>
+                <input type="email" placeholder="vous@entreprise.fr" />
+              </div>
             </div>
             <div>
-              <label>Email</label>
-              <input type="email" placeholder="vous@entreprise.fr" />
+              <label>Message</label>
+              <textarea placeholder="Décrivez votre besoin (fictif)"></textarea>
             </div>
-          </div>
-
-          <div>
-            <label>Message</label>
-            <textarea placeholder="Décrivez votre besoin (fictif)"></textarea>
-          </div>
-
-          <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-            <button class="btn primary" type="submit">Envoyer</button>
-            <span style="color:var(--muted); font-size:12px">Aucune donnée n’est envoyée.</span>
-          </div>
-        </form>
+            <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+              <button class="btn primary" type="submit">Envoyer</button>
+              <span style="color:rgba(238,243,255,.55); font-size:12px">Aucune donnée n’est envoyée.</span>
+            </div>
+          </form>
+        </div>
       </div>
     </section>
-
-    <footer>
-      © <span id="y"></span> EchoDefense — Site de démonstration (projet pédagogique)
-    </footer>
   </main>
 
+  <footer>
+    © <span id="y"></span> EchoDefense — Site de démonstration (projet pédagogique)
+  </footer>
+
   <script>
-    // Année footer
+    // Année
     document.getElementById("y").textContent = new Date().getFullYear();
 
-    // Reveal au scroll (avec respect des préférences)
+    // NAV apparaît après un peu de scroll
+    const nav = document.getElementById("topnav");
+    const showNavAfter = 160; // px
+    const onScroll = () => {
+      nav.classList.toggle("show", window.scrollY > showNavAfter);
+    };
+    window.addEventListener("scroll", onScroll, { passive:true });
+    onScroll();
+
+    // Reveal au scroll
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (!prefersReduced) {
-      const observer = new IntersectionObserver((entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) entry.target.classList.add("is-visible");
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) e.target.classList.add("visible");
         }
-      }, { threshold: 0.12 });
+      }, { threshold: 0.14 });
 
-      document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+      document.querySelectorAll(".reveal").forEach(el => io.observe(el));
     } else {
-      document.querySelectorAll(".reveal").forEach(el => el.classList.add("is-visible"));
+      document.querySelectorAll(".reveal").forEach(el => el.classList.add("visible"));
     }
-  </script>
 
+    // Parallax léger (optionnel, façon “cinéma”)
+    const parallaxEls = [...document.querySelectorAll("[data-parallax]")];
+
+    const parallaxTick = () => {
+      const y = window.scrollY || 0;
+      for (const el of parallaxEls) {
+        const speed = parseFloat(el.getAttribute("data-parallax")) || 0.18;
+        // petite translation (plafonnée) pour garder ça subtil
+        const offset = Math.max(-28, Math.min(28, -y * speed * 0.04));
+        el.style.setProperty("--py", offset.toFixed(2) + "px");
+      }
+    };
+
+    window.addEventListener("scroll", () => requestAnimationFrame(parallaxTick), { passive:true });
+    parallaxTick();
+  </script>
 </body>
 </html>
